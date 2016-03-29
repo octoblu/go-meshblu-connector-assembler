@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path"
 )
 
 // Downloader interface with a way of downloading connector bundles
@@ -33,7 +34,7 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 		return "", err
 	}
 
-	downloadFile := fmt.Sprintf("%v/connector.tar.gz", client.outputDirectory)
+	downloadFile := path.Join(client.outputDirectory, "connector.tar.gz")
 	outputStream, err := os.Create(downloadFile)
 
 	if err != nil {

@@ -6,10 +6,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Extractor ungzips and untars the source to the target
 type Extractor interface {
+	Do(downloadFile, target string) error
 	Ungzip(source, target string) error
 	Untar(tarball, target string) error
 }
@@ -21,6 +23,28 @@ type Client struct {
 // New constructs a new Extractor
 func New() Extractor {
 	return &Client{}
+}
+
+// Do extracts the tar.gz file
+func (client *Client) Do(downloadFile, target string) error {
+	tarFile := strings.Replace(downloadFile, "tar.gz", "tar", 1)
+	ungzipErr := client.Ungzip(downloadFile, tarFile)
+	if ungzipErr != nil {
+		return ungzipErr
+	}
+	untarErr := client.Untar(tarFile, target)
+	if untarErr != nil {
+		return untarErr
+	}
+	removeDownloadErr := os.Remove(downloadFile)
+	if removeDownloadErr != nil {
+		return removeDownloadErr
+	}
+	removeTarFile := os.Remove(tarFile)
+	if removeTarFile != nil {
+		return removeTarFile
+	}
+	return nil
 }
 
 // Ungzip the source to the target

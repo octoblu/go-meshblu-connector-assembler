@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
 	"github.com/fatih/color"
+	"github.com/octoblu/meshblu-connector-installer-go/configurator"
 	"github.com/octoblu/meshblu-connector-installer-go/downloader"
 	"github.com/octoblu/meshblu-connector-installer-go/extractor"
 	De "github.com/tj/go-debug"
@@ -28,6 +29,11 @@ func main() {
 			Usage:  "Meshblu connector name",
 		},
 		cli.StringFlag{
+			Name:   "hostname, -h",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_HOSTNAME",
+			Usage:  "Meshblu device hostname",
+		},
+		cli.StringFlag{
 			Name:   "output, o",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_OUTPUT",
 			Usage:  "Output directory",
@@ -37,56 +43,97 @@ func main() {
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PLATFORM",
 			Usage:  "Platform name, 'osx', 'linux', 'win32', 'win64'. Defualts to 'osx'",
 		},
+		cli.IntFlag{
+			Name:   "port",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PORT",
+			Usage:  "Meshblu device port",
+		},
+		cli.StringFlag{
+			Name:   "uuid, -u",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_UUID",
+			Usage:  "Meshblu device uuid",
+		},
 		cli.StringFlag{
 			Name:   "tag, t",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_TAG",
 			Usage:  "Tag version. Defaults to 'latest'",
+		},
+		cli.StringFlag{
+			Name:   "token",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_TOKEN",
+			Usage:  "Meshblu device token",
 		},
 	}
 	app.Run(os.Args)
 }
 
 func run(context *cli.Context) {
-	connector, outputDirectory, platform, tag := getOpts(context)
+	connector, hostname, outputDirectory, platform, port, uuid, tag, token := getOpts(context)
 	baseURI := "https://meshblu-connector.octoblu.com"
 	downloadClient := downloader.New(outputDirectory, baseURI)
 	downloadFile, err := downloadClient.DownloadConnector(connector, tag, platform)
 	if err != nil {
 		log.Fatalln("Error downloading:", err.Error())
+		os.Exit(1)
 	}
 	extractorClient := extractor.New()
-	tarFile := strings.Replace(downloadFile, "tar.gz", "tar", 1)
-	ungzipErr := extractorClient.Ungzip(downloadFile, tarFile)
-	if ungzipErr != nil {
-		log.Fatalln("Error ungziping:", ungzipErr.Error())
+	extractErr := extractorClient.Do(downloadFile, outputDirectory)
+	if extractErr != nil {
+		log.Fatalln("Error extracting:", extractErr.Error())
+		os.Exit(1)
 	}
-	untarErr := extractorClient.Untar(tarFile, outputDirectory)
-	if untarErr != nil {
-		log.Fatalln("Error untaring:", untarErr.Error())
+	configuratorClient := configurator.New(outputDirectory)
+	meshbluConfigErr := configuratorClient.WriteMeshblu(uuid, token, hostname, port)
+	if meshbluConfigErr != nil {
+		log.Fatalln("Error writing meshblu config:", extractErr.Error())
+		os.Exit(1)
 	}
 }
 
-func getOpts(context *cli.Context) (string, string, string, string) {
+func getOpts(context *cli.Context) (string, string, string, string, int, string, string, string) {
 	connector := context.String("connector")
-	outputDirectory := context.String("output")
+	hostname := context.String("hostname")
+	output := context.String("output")
 	platform := context.String("platform")
+	port := context.Int("port")
+	uuid := context.String("uuid")
 	tag := context.String("tag")
+	token := context.String("token")
 
-	if connector == "" {
+	if output == "" || connector == "" || uuid == "" || token == "" {
 		cli.ShowAppHelp(context)
 
 		if connector == "" {
 			color.Red("  Missing required flag --connector or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
 		}
-		os.Exit(1)
-	}
-	if outputDirectory == "" {
-		cli.ShowAppHelp(context)
 
-		if outputDirectory == "" {
+		if output == "" {
 			color.Red("  Missing required flag --output or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
 		}
+
+		if uuid == "" {
+			color.Red("  Missing required flag --uuid or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
+		}
+
+		if token == "" {
+			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
+		}
+
 		os.Exit(1)
+	}
+
+	outputDirectory, err := filepath.Abs(filepath.Dir(output))
+	if err != nil {
+		log.Fatalln("Invalid output directory:", err.Error())
+		os.Exit(1)
+	}
+
+	if hostname == "" {
+		hostname = "meshblu.octoblu.com"
+	}
+
+	if port == 0 {
+		port = 443
 	}
 
 	if platform == "" {
@@ -97,7 +144,7 @@ func getOpts(context *cli.Context) (string, string, string, string) {
 		tag = "latest"
 	}
 
-	return connector, outputDirectory, platform, tag
+	return connector, hostname, outputDirectory, platform, port, uuid, tag, token
 }
 
 func version() string {
