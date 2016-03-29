@@ -13,7 +13,7 @@ import (
 	"github.com/octoblu/meshblu-connector-installer-go/configurator"
 	"github.com/octoblu/meshblu-connector-installer-go/downloader"
 	"github.com/octoblu/meshblu-connector-installer-go/extractor"
-	"github.com/octoblu/meshblu-connector-installer-go/foreverer"
+	"github.com/octoblu/meshblu-connector-installer-go/foreverizer"
 	De "github.com/tj/go-debug"
 )
 
@@ -83,8 +83,8 @@ func run(context *cli.Context) {
 	err = configuratorClient.WriteMeshblu(uuid, token, hostname, port)
 	fatalIfError("Error writing meshblu config:", err)
 
-	forevererClient := foreverer.New(outputDirectory, uuid)
-	err := forevererClient.Do()
+	foreverizerClient := foreverizer.New()
+	err = foreverizerClient.Do(uuid, outputDirectory)
 	fatalIfError("Error setuping device to run forever", err)
 }
 
@@ -97,7 +97,7 @@ func getOpts(context *cli.Context) (string, string, string, int, string, string,
 	tag := context.String("tag")
 	token := context.String("token")
 
-	if output == "" || connector == "" || uuid == "" || token == "" {
+	if connector == "" || uuid == "" || token == "" {
 		cli.ShowAppHelp(context)
 
 		if connector == "" {
