@@ -8,6 +8,7 @@ import (
 	"github.com/DHowett/go-plist"
 )
 
+// DarwinServiceData interfaces the required plist information
 type DarwinServiceData struct {
 	Label             string   `plist:"Label"`
 	ProgramArguments  []string `plist:"ProgramArguments"`
@@ -19,10 +20,7 @@ type DarwinServiceData struct {
 
 // DarwinServiceConfig interfaces with a remote meshblu server
 type DarwinServiceConfig struct {
-	UUID     string `json:"uuid"`
-	Token    string `json:"token"`
-	Hostname string `json:"hostname"`
-	Port     int    `json:"port"`
+	uuid, workingDirectory string
 }
 
 // NewDarwinServiceConfig constructs a new Meshblu instance
@@ -39,7 +37,7 @@ func (config *DarwinServiceConfig) String() ([]byte, error) {
 	keepAlive := true
 	outPath := path.Join("/var/log/octoblu", fmt.Sprintf("%s.log", config.uuid))
 	errPath := path.Join("/var/log/octoblu", fmt.Sprintf("%s-error.log", config.uuid))
-	data := &DarwinServiceData{label, pArgs, keepAlive, outPath, errPath}
+	data := &DarwinServiceData{label, pArgs, keepAlive, outPath, errPath, config.workingDirectory}
 	err := encoder.Encode(data)
 	if err != nil {
 		return nil, err
