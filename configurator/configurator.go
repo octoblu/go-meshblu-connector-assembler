@@ -29,7 +29,7 @@ func (client *Client) WriteMeshblu(UUID, Token, Hostname string, Port int) error
 	}
 
 	configFilePath := path.Join(client.outputDirectory, "meshblu.json")
-	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0644)
+	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0755)
 	if writeErr != nil {
 		return writeErr
 	}

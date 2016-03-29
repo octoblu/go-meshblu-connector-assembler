@@ -67,7 +67,7 @@ func main() {
 func run(context *cli.Context) {
 	connector, hostname, outputDirectory, port, uuid, tag, token := getOpts(context)
 	platform := "osx"
-	err := os.MkdirAll(outputDirectory, 0644)
+	err := os.MkdirAll(outputDirectory, 0755)
 	fatalIfError("Error creating output directory", err)
 
 	baseURI := "https://meshblu-connector.octoblu.com"
@@ -118,7 +118,7 @@ func getOpts(context *cli.Context) (string, string, string, int, string, string,
 		output = path.Join(os.Getenv("HOME"), "Library", "Application Support", "Octoblu", uuid)
 	}
 
-	outputDirectory, err := filepath.Abs(filepath.Dir(output))
+	outputDirectory, err := filepath.Abs(output)
 	if err != nil {
 		log.Fatalln("Invalid output directory:", err.Error())
 	}
