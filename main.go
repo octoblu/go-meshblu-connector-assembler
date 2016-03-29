@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
@@ -12,6 +13,7 @@ import (
 	"github.com/octoblu/meshblu-connector-installer-go/configurator"
 	"github.com/octoblu/meshblu-connector-installer-go/downloader"
 	"github.com/octoblu/meshblu-connector-installer-go/extractor"
+	"github.com/octoblu/meshblu-connector-installer-go/foreverer"
 	De "github.com/tj/go-debug"
 )
 
@@ -38,11 +40,6 @@ func main() {
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_OUTPUT",
 			Usage:  "Output directory",
 		},
-		cli.StringFlag{
-			Name:   "platform, p",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PLATFORM",
-			Usage:  "Platform name, 'osx', 'linux', 'win32', 'win64'. Defualts to 'osx'",
-		},
 		cli.IntFlag{
 			Name:   "port",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PORT",
@@ -68,7 +65,8 @@ func main() {
 }
 
 func run(context *cli.Context) {
-	connector, hostname, outputDirectory, platform, port, uuid, tag, token := getOpts(context)
+	connector, hostname, outputDirectory, port, uuid, tag, token := getOpts(context)
+	platform := "osx"
 	baseURI := "https://meshblu-connector.octoblu.com"
 	downloadClient := downloader.New(outputDirectory, baseURI)
 	downloadFile, err := downloadClient.DownloadConnector(connector, tag, platform)
@@ -88,13 +86,19 @@ func run(context *cli.Context) {
 		log.Fatalln("Error writing meshblu config:", extractErr.Error())
 		os.Exit(1)
 	}
+
+	forevererClient := foreverer.New(outputDirectory, uuid)
+	setupErr := forevererClient.Do()
+	if setupErr != nil {
+		log.Fatalln("Error setuping device to run forever", extractErr.Error())
+		os.Exit(1)
+	}
 }
 
-func getOpts(context *cli.Context) (string, string, string, string, int, string, string, string) {
+func getOpts(context *cli.Context) (string, string, string, int, string, string, string) {
 	connector := context.String("connector")
 	hostname := context.String("hostname")
 	output := context.String("output")
-	platform := context.String("platform")
 	port := context.Int("port")
 	uuid := context.String("uuid")
 	tag := context.String("tag")
@@ -107,10 +111,6 @@ func getOpts(context *cli.Context) (string, string, string, string, int, string,
 			color.Red("  Missing required flag --connector or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
 		}
 
-		if output == "" {
-			color.Red("  Missing required flag --output or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
-		}
-
 		if uuid == "" {
 			color.Red("  Missing required flag --uuid or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
 		}
@@ -120,6 +120,10 @@ func getOpts(context *cli.Context) (string, string, string, string, int, string,
 		}
 
 		os.Exit(1)
+	}
+
+	if output == "" {
+		output = path.Join(os.Getenv("HOME"), "Library", "Application Support", "Octoblu", uuid)
 	}
 
 	outputDirectory, err := filepath.Abs(filepath.Dir(output))
@@ -136,15 +140,11 @@ func getOpts(context *cli.Context) (string, string, string, string, int, string,
 		port = 443
 	}
 
-	if platform == "" {
-		platform = "osx"
-	}
-
 	if tag == "" {
 		tag = "latest"
 	}
 
-	return connector, hostname, outputDirectory, platform, port, uuid, tag, token
+	return connector, hostname, outputDirectory, port, uuid, tag, token
 }
 
 func version() string {

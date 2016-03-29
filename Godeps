@@ -4,3 +4,4 @@ github.com/fatih/color
 github.com/onsi/ginkgo/ginkgo
 github.com/onsi/gomega
 github.com/tj/go-debug
+github.com/DHowett/go-plist
