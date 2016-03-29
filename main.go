@@ -67,32 +67,25 @@ func main() {
 func run(context *cli.Context) {
 	connector, hostname, outputDirectory, port, uuid, tag, token := getOpts(context)
 	platform := "osx"
+	err := os.MkdirAll(outputDirectory, 0644)
+	fatalIfError("Error creating output directory", err)
+
 	baseURI := "https://meshblu-connector.octoblu.com"
 	downloadClient := downloader.New(outputDirectory, baseURI)
 	downloadFile, err := downloadClient.DownloadConnector(connector, tag, platform)
-	if err != nil {
-		log.Fatalln("Error downloading:", err.Error())
-		os.Exit(1)
-	}
+	fatalIfError("Error downloading", err)
+
 	extractorClient := extractor.New()
-	extractErr := extractorClient.Do(downloadFile, outputDirectory)
-	if extractErr != nil {
-		log.Fatalln("Error extracting:", extractErr.Error())
-		os.Exit(1)
-	}
+	err = extractorClient.Do(downloadFile, outputDirectory)
+	fatalIfError("Error extracting:", err)
+
 	configuratorClient := configurator.New(outputDirectory)
-	meshbluConfigErr := configuratorClient.WriteMeshblu(uuid, token, hostname, port)
-	if meshbluConfigErr != nil {
-		log.Fatalln("Error writing meshblu config:", extractErr.Error())
-		os.Exit(1)
-	}
+	err = configuratorClient.WriteMeshblu(uuid, token, hostname, port)
+	fatalIfError("Error writing meshblu config:", err)
 
 	forevererClient := foreverer.New(outputDirectory, uuid)
-	setupErr := forevererClient.Do()
-	if setupErr != nil {
-		log.Fatalln("Error setuping device to run forever", extractErr.Error())
-		os.Exit(1)
-	}
+	err := forevererClient.Do()
+	fatalIfError("Error setuping device to run forever", err)
 }
 
 func getOpts(context *cli.Context) (string, string, string, int, string, string, string) {
@@ -118,7 +111,6 @@ func getOpts(context *cli.Context) (string, string, string, int, string, string,
 		if token == "" {
 			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
 		}
-
 		os.Exit(1)
 	}
 
@@ -129,7 +121,6 @@ func getOpts(context *cli.Context) (string, string, string, int, string, string,
 	outputDirectory, err := filepath.Abs(filepath.Dir(output))
 	if err != nil {
 		log.Fatalln("Invalid output directory:", err.Error())
-		os.Exit(1)
 	}
 
 	if hostname == "" {
@@ -145,6 +136,14 @@ func getOpts(context *cli.Context) (string, string, string, int, string, string,
 	}
 
 	return connector, hostname, outputDirectory, port, uuid, tag, token
+}
+
+func fatalIfError(msg string, err error) {
+	if err == nil {
+		return
+	}
+
+	log.Fatalln(msg, err.Error())
 }
 
 func version() string {
