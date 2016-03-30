@@ -37,14 +37,14 @@ func (client *Client) Do(downloadFile, target string) error {
 	if untarErr != nil {
 		return untarErr
 	}
-	// removeDownloadErr := os.Remove(downloadFile)
-	// if removeDownloadErr != nil {
-	// 	return removeDownloadErr
-	// }
-	// removeTarFile := os.Remove(tarFile)
-	// if removeTarFile != nil {
-	// 	return removeTarFile
-	// }
+	removeDownloadErr := os.Remove(downloadFile)
+	if removeDownloadErr != nil {
+		return removeDownloadErr
+	}
+	removeTarFile := os.Remove(tarFile)
+	if removeTarFile != nil {
+		return removeTarFile
+	}
 	return nil
 }
 

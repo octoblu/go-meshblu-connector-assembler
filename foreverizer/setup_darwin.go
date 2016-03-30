@@ -12,45 +12,22 @@ import (
 
 // Setup configures the os to the device
 func Setup(uuid, outputDirectory string) error {
-	logDirectory := path.Join(outputDirectory, "log")
-	err := os.MkdirAll(logDirectory, 0777)
-	if err != nil {
-		return err
-	}
-	serviceConfig := configurator.NewServiceConfig(uuid, outputDirectory, logDirectory)
-	fileBytes, err := serviceConfig.Export()
+	err := setupStructure(outputDirectory)
 	if err != nil {
 		return err
 	}
 
-	serviceFileName := fmt.Sprintf("com.octoblu.%s.plist", uuid)
-	serviceFilePath := path.Join(outputDirectory, serviceFileName)
-	err = ioutil.WriteFile(serviceFilePath, fileBytes, 0644)
+	err = writeServiceFile(uuid, outputDirectory)
 	if err != nil {
 		return err
 	}
 
-	launchFilePath := path.Join(os.Getenv("HOME"), "Library/LaunchAgents", serviceFileName)
-	_, err = os.Stat(launchFilePath)
-
-	fileExists, err := filePathExists(launchFilePath)
+	err = setupLaunchFile(uuid, outputDirectory)
 	if err != nil {
 		return err
 	}
 
-	if fileExists {
-		err = os.Remove(launchFilePath)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = os.Symlink(serviceFilePath, launchFilePath)
-	if err != nil {
-		return fmt.Errorf("os.Symlink: %v", err.Error())
-	}
-
-	err = startService(launchFilePath)
+	err = startService(uuid)
 	if err != nil {
 		return err
 	}
@@ -70,8 +47,67 @@ func filePathExists(path string) (bool, error) {
 	return true, nil
 }
 
-func startService(launchFilePath string) error {
-	_, err := exec.Command("launchctl", "load", launchFilePath).Output()
+func getLaunchFilePath(uuid string) string {
+	return path.Join(os.Getenv("HOME"), "Library/LaunchAgents", getServiceFileName(uuid))
+}
+func getLogDirectory(outputDirectory string) string {
+	return path.Join(outputDirectory, "log")
+}
+
+func getServiceFileName(uuid string) string {
+	return fmt.Sprintf("com.octoblu.%s.plist", uuid)
+}
+
+func getServiceFilePath(uuid, outputDirectory string) string {
+	return path.Join(outputDirectory, getServiceFileName(uuid))
+}
+
+func setupLaunchFile(uuid, outputDirectory string) error {
+	launchFilePath := getLaunchFilePath(uuid)
+	_, err := os.Stat(launchFilePath)
+
+	fileExists, err := filePathExists(launchFilePath)
+	if err != nil {
+		return err
+	}
+
+	if fileExists {
+		err = os.Remove(launchFilePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = os.Symlink(getServiceFilePath(uuid, outputDirectory), launchFilePath)
+	if err != nil {
+		return fmt.Errorf("os.Symlink: %v", err.Error())
+	}
+	return nil
+}
+
+func setupStructure(outputDirectory string) error {
+	err := os.MkdirAll(getLogDirectory(outputDirectory), 0777)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func startService(uuid string) error {
+	_, err := exec.Command("launchctl", "load", getLaunchFilePath(uuid)).Output()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func writeServiceFile(uuid, outputDirectory string) error {
+	serviceConfig := configurator.NewServiceConfig(uuid, outputDirectory, getLogDirectory(outputDirectory))
+	fileBytes, err := serviceConfig.Export()
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(getServiceFilePath(uuid, outputDirectory), fileBytes, 0644)
 	if err != nil {
 		return err
 	}
