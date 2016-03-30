@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path"
 
-	"github.com/octoblu/meshblu-connector-installer-go/configurator"
+	"github.com/octoblu/go-meshblu-connector-installer/configurator"
 )
 
 // Setup configures the os to the device

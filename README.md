@@ -1,2 +1,2 @@
-# meshblu-connector-installer-go
+# go-meshblu-connector-installer
 Meshblu connector installer for go

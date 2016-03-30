@@ -10,10 +10,10 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
 	"github.com/fatih/color"
-	"github.com/octoblu/meshblu-connector-installer-go/configurator"
-	"github.com/octoblu/meshblu-connector-installer-go/downloader"
-	"github.com/octoblu/meshblu-connector-installer-go/extractor"
-	"github.com/octoblu/meshblu-connector-installer-go/foreverizer"
+	"github.com/octoblu/go-meshblu-connector-installer/configurator"
+	"github.com/octoblu/go-meshblu-connector-installer/downloader"
+	"github.com/octoblu/go-meshblu-connector-installer/extractor"
+	"github.com/octoblu/go-meshblu-connector-installer/foreverizer"
 	De "github.com/tj/go-debug"
 )
 

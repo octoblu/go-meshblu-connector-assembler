@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=meshblu-device-claimer
+APP_NAME=meshblu-connector-installer
 TMP_DIR=$PWD/tmp/cross
 IMAGE_NAME=local/$APP_NAME
 

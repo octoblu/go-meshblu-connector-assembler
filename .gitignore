@@ -25,3 +25,4 @@ _testmain.go
 meshblu-connector-installer
 entrypoint/meshblu-connector-installer
 meshblu-connector-installer-go
+go-meshblu-connector-installer

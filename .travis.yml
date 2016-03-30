@@ -7,9 +7,9 @@ before_install:
 - "./gpm"
 before_deploy:
 - "./cross-compile.sh"
-- mkdir -p deploy/meshblu-connector-installer-go/latest deploy/meshblu-connector-installer-go/$TRAVIS_TAG
-- cp tmp/cross/* deploy/meshblu-connector-installer-go/latest
-- cp tmp/cross/* deploy/meshblu-connector-installer-go/$TRAVIS_TAG
+- mkdir -p deploy/go-meshblu-connector-installer/latest deploy/go-meshblu-connector-installer/$TRAVIS_TAG
+- cp tmp/cross/* deploy/go-meshblu-connector-installer/latest
+- cp tmp/cross/* deploy/go-meshblu-connector-installer/$TRAVIS_TAG
 deploy:
   provider: s3
   access_key_id: AKIAJH2D5IPIRHYJT5IA
@@ -23,4 +23,4 @@ deploy:
   upload-dir: tools
   on:
     tags: true
-    repo: octoblu/meshblu-connector-installer-go
+    repo: octoblu/go-meshblu-connector-installer
