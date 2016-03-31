@@ -2,7 +2,7 @@ package foreverizer
 
 // Foreverizer interfaces the long running services on the os
 type Foreverizer interface {
-	Do(uuid, outputDirectory string) error
+	Do(uuid, connector, outputDirectory string) error
 }
 
 // Client defines the Foreverizer
@@ -15,6 +15,6 @@ func New() Foreverizer {
 }
 
 // Do will run the setup
-func (client *Client) Do(uuid, outputDirectory string) error {
-	return Setup(uuid, outputDirectory)
+func (client *Client) Do(uuid, connector, outputDirectory string) error {
+	return Setup(uuid, connector, outputDirectory)
 }

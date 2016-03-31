@@ -11,13 +11,13 @@ import (
 )
 
 // Setup configures the os to the device
-func Setup(uuid, outputDirectory string) error {
+func Setup(uuid, connector, outputDirectory string) error {
 	err := setupStructure(outputDirectory)
 	if err != nil {
 		return err
 	}
 
-	err = writeServiceFile(uuid, outputDirectory)
+	err = writeServiceFile(uuid, connector, outputDirectory)
 	if err != nil {
 		return err
 	}
@@ -101,8 +101,8 @@ func startService(uuid string) error {
 	return nil
 }
 
-func writeServiceFile(uuid, outputDirectory string) error {
-	serviceConfig := configurator.NewServiceConfig(uuid, outputDirectory, getLogDirectory(outputDirectory))
+func writeServiceFile(uuid, connector, outputDirectory string) error {
+	serviceConfig := configurator.NewServiceConfig(uuid, connector, outputDirectory, getLogDirectory(outputDirectory))
 	fileBytes, err := serviceConfig.Export()
 	if err != nil {
 		return err

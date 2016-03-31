@@ -85,7 +85,7 @@ func run(context *cli.Context) {
 	fatalIfError("Error writing meshblu config:", err)
 
 	foreverizerClient := foreverizer.New()
-	err = foreverizerClient.Do(uuid, outputDirectory)
+	err = foreverizerClient.Do(uuid, connector, outputDirectory)
 	fatalIfError("Error setuping device to run forever", err)
 }
 
