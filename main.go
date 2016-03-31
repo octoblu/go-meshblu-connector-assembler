@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -66,7 +67,7 @@ func main() {
 
 func run(context *cli.Context) {
 	connector, hostname, outputDirectory, port, uuid, tag, token := getOpts(context)
-	platform := "osx"
+	platform := runtime.GOOS
 	err := os.MkdirAll(outputDirectory, 0755)
 	fatalIfError("Error creating output directory", err)
 
