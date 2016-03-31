@@ -20,6 +20,15 @@ import (
 
 var debug = De.Debug("meshblu-connector-installer:main")
 
+// CommandOpts defines the command line arguments
+type CommandOpts struct {
+	connector, hostname string
+	legacy              bool
+	outputDirectory     string
+	port                int
+	uuid, tag, token    string
+}
+
 func main() {
 	app := cli.NewApp()
 	app.Name = "meshblu-connector-installer"
@@ -32,9 +41,14 @@ func main() {
 			Usage:  "Meshblu connector name",
 		},
 		cli.StringFlag{
-			Name:   "hostname, -h",
+			Name:   "hostname",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_HOSTNAME",
 			Usage:  "Meshblu device hostname",
+		},
+		cli.BoolFlag{
+			Name:   "legacy, l",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_LEGACY",
+			Usage:  "Run legacy meshblu connector",
 		},
 		cli.StringFlag{
 			Name:   "output, o",
@@ -42,7 +56,7 @@ func main() {
 			Usage:  "Output directory",
 		},
 		cli.IntFlag{
-			Name:   "port",
+			Name:   "port, -p",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PORT",
 			Usage:  "Meshblu device port",
 		},
@@ -66,77 +80,88 @@ func main() {
 }
 
 func run(context *cli.Context) {
-	connector, hostname, outputDirectory, port, uuid, tag, token := getOpts(context)
+	opts := getOpts(context)
 	platform := runtime.GOOS
-	err := os.MkdirAll(outputDirectory, 0755)
+	err := os.MkdirAll(opts.outputDirectory, 0755)
 	fatalIfError("Error creating output directory", err)
 
 	baseURI := "https://meshblu-connector.octoblu.com"
-	downloadClient := downloader.New(outputDirectory, baseURI)
-	downloadFile, err := downloadClient.DownloadConnector(connector, tag, platform)
+	downloadClient := downloader.New(opts.outputDirectory, baseURI)
+	downloadFile, err := downloadClient.DownloadConnector(getConnector(opts), opts.tag, platform)
 	fatalIfError("Error downloading", err)
 
 	extractorClient := extractor.New()
-	err = extractorClient.Do(downloadFile, outputDirectory)
+	err = extractorClient.Do(downloadFile, opts.outputDirectory)
 	fatalIfError("Error extracting:", err)
 
-	configuratorClient := configurator.New(outputDirectory)
-	err = configuratorClient.WriteMeshblu(uuid, token, hostname, port)
+	configuratorClient := configurator.New(opts.outputDirectory)
+	err = configuratorClient.WriteMeshblu(opts.uuid, opts.token, opts.hostname, opts.port)
 	fatalIfError("Error writing meshblu config:", err)
 
 	foreverizerClient := foreverizer.New()
-	err = foreverizerClient.Do(uuid, connector, outputDirectory)
+	err = foreverizerClient.Do(opts.uuid, opts.connector, opts.outputDirectory)
 	fatalIfError("Error setuping device to run forever", err)
 }
 
-func getOpts(context *cli.Context) (string, string, string, int, string, string, string) {
-	connector := context.String("connector")
-	hostname := context.String("hostname")
-	output := context.String("output")
-	port := context.Int("port")
-	uuid := context.String("uuid")
-	tag := context.String("tag")
-	token := context.String("token")
+func getConnector(opts *CommandOpts) string {
+	if opts.legacy {
+		return "run-legacy"
+	}
+	return opts.connector
+}
 
-	if connector == "" || uuid == "" || token == "" {
+func getOpts(context *cli.Context) *CommandOpts {
+	commandOpts := &CommandOpts{
+		context.String("connector"),
+		context.String("hostname"),
+		context.Bool("legacy"),
+		context.String("output"),
+		context.Int("port"),
+		context.String("uuid"),
+		context.String("tag"),
+		context.String("token"),
+	}
+
+	if commandOpts.connector == "" || commandOpts.uuid == "" || commandOpts.token == "" {
 		cli.ShowAppHelp(context)
 
-		if connector == "" {
+		if commandOpts.connector == "" {
 			color.Red("  Missing required flag --connector or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
 		}
 
-		if uuid == "" {
+		if commandOpts.uuid == "" {
 			color.Red("  Missing required flag --uuid or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
 		}
 
-		if token == "" {
+		if commandOpts.token == "" {
 			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
 		}
 		os.Exit(1)
 	}
 
-	if output == "" {
-		output = path.Join(os.Getenv("HOME"), "Library", "Application Support", "Octoblu", uuid)
+	if commandOpts.outputDirectory == "" {
+		commandOpts.outputDirectory = path.Join(os.Getenv("HOME"), "Library", "Application Support", "Octoblu", commandOpts.uuid)
 	}
 
-	outputDirectory, err := filepath.Abs(output)
+	outputDirectory, err := filepath.Abs(commandOpts.outputDirectory)
 	if err != nil {
 		log.Fatalln("Invalid output directory:", err.Error())
 	}
+	commandOpts.outputDirectory = outputDirectory
 
-	if hostname == "" {
-		hostname = "meshblu.octoblu.com"
+	if commandOpts.hostname == "" {
+		commandOpts.hostname = "meshblu.octoblu.com"
 	}
 
-	if port == 0 {
-		port = 443
+	if commandOpts.port == 0 {
+		commandOpts.port = 443
 	}
 
-	if tag == "" {
-		tag = "latest"
+	if commandOpts.tag == "" {
+		commandOpts.tag = "latest"
 	}
 
-	return connector, hostname, outputDirectory, port, uuid, tag, token
+	return commandOpts
 }
 
 func fatalIfError(msg string, err error) {
