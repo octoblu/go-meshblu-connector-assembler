@@ -29,7 +29,7 @@ func New() Extractor {
 // Do extracts the tar.gz file
 func (client *Client) Do(downloadFile, target string) error {
 	tarFile := strings.Replace(downloadFile, "tar.gz", "tar", 1)
-	ungzipErr := client.Ungzip(downloadFile, tarFile)
+	ungzipErr := client.Ungzip(downloadFile, target)
 	if ungzipErr != nil {
 		return ungzipErr
 	}
