@@ -64,7 +64,6 @@ func getServiceFilePath(uuid, outputDirectory string) string {
 
 func setupLaunchFile(uuid, outputDirectory string) error {
 	launchFilePath := getLaunchFilePath(uuid)
-	_, err := os.Stat(launchFilePath)
 
 	fileExists, err := filePathExists(launchFilePath)
 	if err != nil {

@@ -100,6 +100,7 @@ func (client *Client) Untar(tarball, target string) error {
 		}
 
 		if header.Typeflag == tar.TypeSymlink {
+			os.Remove(path)
 			err = os.Symlink(header.Linkname, path)
 			if err != nil {
 				return err

@@ -140,7 +140,7 @@ func getOpts(context *cli.Context) *CommandOpts {
 	}
 
 	if commandOpts.outputDirectory == "" {
-		commandOpts.outputDirectory = path.Join(os.Getenv("HOME"), "Library", "Application Support", "Octoblu", commandOpts.uuid)
+		commandOpts.outputDirectory = path.Join(os.Getenv("HOME"), "Library", "Application Support", "MeshbluConnectors", commandOpts.uuid)
 	}
 
 	outputDirectory, err := filepath.Abs(commandOpts.outputDirectory)
