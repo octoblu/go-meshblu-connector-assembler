@@ -41,8 +41,9 @@ func (config *ServiceConfig) Export() ([]byte, error) {
 	keepAlive := true
 	outPath := path.Join(config.logDirectory, fmt.Sprintf("%s.log", config.uuid))
 	errPath := path.Join(config.logDirectory, fmt.Sprintf("%s-error.log", config.uuid))
+	binPath := path.Join(os.Getenv("HOME"), "Library", "Application Support", "MeshbluConnectors", "bin")
 	env := map[string]string{
-		"PATH":              os.Getenv("PATH"),
+		"PATH":              fmt.Sprintf("/sbin:/usr/sbin:/bin:/usr/bin:%s", binPath),
 		"MESHBLU_CONNECTOR": config.connector,
 	}
 	data := &ServiceData{label, pArgs, keepAlive, outPath, errPath, config.workingDirectory, env}
