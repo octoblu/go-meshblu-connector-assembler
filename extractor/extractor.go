@@ -62,7 +62,8 @@ func (client *Client) Ungzip(source, target string) error {
 	}
 	defer archive.Close()
 
-	target = filepath.Join(target, archive.Name)
+	filename := filepath.Base(source)
+	target = filepath.Join(target, strings.Replace(filename, "tar.gz", "tar", 1))
 	writer, err := os.Create(target)
 	if err != nil {
 		return fmt.Errorf("Ungzip, os.Create: %v", err.Error())
