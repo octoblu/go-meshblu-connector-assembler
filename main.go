@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"runtime"
 
@@ -25,6 +24,7 @@ type CommandOpts struct {
 	connector, hostname string
 	legacy              bool
 	outputDirectory     string
+	connectorDirectory  string
 	port                int
 	uuid, tag, token    string
 }
@@ -86,12 +86,12 @@ func run(context *cli.Context) {
 	fatalIfError("Error creating output directory", err)
 
 	baseURI := "https://meshblu-connector.octoblu.com"
-	downloadClient := downloader.New(opts.outputDirectory, baseURI)
+	downloadClient := downloader.New(opts.connectorDirectory, baseURI)
 	downloadFile, err := downloadClient.DownloadConnector(getConnector(opts), opts.tag, platform)
 	fatalIfError("Error downloading", err)
 
 	extractorClient := extractor.New()
-	err = extractorClient.Do(downloadFile, opts.outputDirectory)
+	err = extractorClient.Do(downloadFile, opts.connectorDirectory)
 	fatalIfError("Error extracting:", err)
 
 	configuratorClient := configurator.New(opts.outputDirectory)
@@ -116,6 +116,7 @@ func getOpts(context *cli.Context) *CommandOpts {
 		context.String("hostname"),
 		context.Bool("legacy"),
 		context.String("output"),
+		"",
 		context.Int("port"),
 		context.String("uuid"),
 		context.String("tag"),
@@ -140,13 +141,14 @@ func getOpts(context *cli.Context) *CommandOpts {
 	}
 
 	if commandOpts.outputDirectory == "" {
-		commandOpts.outputDirectory = path.Join(os.Getenv("HOME"), "Library", "Application Support", "MeshbluConnectors", commandOpts.uuid)
+		commandOpts.outputDirectory = configurator.GetDefaultServiceDirectory()
 	}
 
 	outputDirectory, err := filepath.Abs(commandOpts.outputDirectory)
 	if err != nil {
 		log.Fatalln("Invalid output directory:", err.Error())
 	}
+	commandOpts.connectorDirectory = configurator.GetConnectorDirectory(outputDirectory, commandOpts.uuid)
 	commandOpts.outputDirectory = outputDirectory
 
 	if commandOpts.hostname == "" {

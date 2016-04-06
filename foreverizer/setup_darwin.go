@@ -5,14 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 
 	"github.com/octoblu/go-meshblu-connector-installer/configurator"
 )
 
 // Setup configures the os to the device
 func Setup(uuid, connector, outputDirectory string) error {
-	err := setupStructure(outputDirectory)
+	err := setupStructure(uuid, outputDirectory)
 	if err != nil {
 		return err
 	}
@@ -34,38 +33,10 @@ func Setup(uuid, connector, outputDirectory string) error {
 	return nil
 }
 
-func filePathExists(path string) (bool, error) {
-	_, err := os.Stat(path)
-
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-		return false, err
-	}
-
-	return true, nil
-}
-
-func getLaunchFilePath(uuid string) string {
-	return path.Join(os.Getenv("HOME"), "Library/LaunchAgents", getServiceFileName(uuid))
-}
-func getLogDirectory(outputDirectory string) string {
-	return path.Join(outputDirectory, "log")
-}
-
-func getServiceFileName(uuid string) string {
-	return fmt.Sprintf("com.octoblu.%s.plist", uuid)
-}
-
-func getServiceFilePath(uuid, outputDirectory string) string {
-	return path.Join(outputDirectory, getServiceFileName(uuid))
-}
-
 func setupLaunchFile(uuid, outputDirectory string) error {
-	launchFilePath := getLaunchFilePath(uuid)
+	launchFilePath := configurator.GetLaunchFilePath(uuid)
 
-	fileExists, err := filePathExists(launchFilePath)
+	fileExists, err := FilePathExists(launchFilePath)
 	if err != nil {
 		return err
 	}
@@ -77,15 +48,15 @@ func setupLaunchFile(uuid, outputDirectory string) error {
 		}
 	}
 
-	err = os.Symlink(getServiceFilePath(uuid, outputDirectory), launchFilePath)
+	err = os.Symlink(configurator.GetServiceFilePath(uuid, outputDirectory), launchFilePath)
 	if err != nil {
 		return fmt.Errorf("os.Symlink: %v", err.Error())
 	}
 	return nil
 }
 
-func setupStructure(outputDirectory string) error {
-	err := os.MkdirAll(getLogDirectory(outputDirectory), 0777)
+func setupStructure(uuid, outputDirectory string) error {
+	err := os.MkdirAll(configurator.GetLogDirectory(outputDirectory, uuid), 0777)
 	if err != nil {
 		return err
 	}
@@ -93,7 +64,7 @@ func setupStructure(outputDirectory string) error {
 }
 
 func startService(uuid string) error {
-	_, err := exec.Command("launchctl", "load", getLaunchFilePath(uuid)).Output()
+	_, err := exec.Command("launchctl", "load", configurator.GetLaunchFilePath(uuid)).Output()
 	if err != nil {
 		return err
 	}
@@ -101,12 +72,12 @@ func startService(uuid string) error {
 }
 
 func writeServiceFile(uuid, connector, outputDirectory string) error {
-	serviceConfig := configurator.NewServiceConfig(uuid, connector, outputDirectory, getLogDirectory(outputDirectory))
+	serviceConfig := configurator.NewServiceConfig(uuid, connector, outputDirectory)
 	fileBytes, err := serviceConfig.Export()
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(getServiceFilePath(uuid, outputDirectory), fileBytes, 0644)
+	err = ioutil.WriteFile(configurator.GetServiceFilePath(uuid, outputDirectory), fileBytes, 0644)
 	if err != nil {
 		return err
 	}

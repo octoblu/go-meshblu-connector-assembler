@@ -2,12 +2,12 @@ package configurator
 
 // ServiceConfig interfaces with a remote meshblu server
 type ServiceConfig struct {
-	uuid, connector, workingDirectory, logDirectory string
+	uuid, connector, workingDirectory string
 }
 
 // NewServiceConfig constructs a new Meshblu instance
-func NewServiceConfig(uuid, connector, workingDirectory, logDirectory string) *ServiceConfig {
-	return &ServiceConfig{uuid, connector, workingDirectory, logDirectory}
+func NewServiceConfig(uuid, connector, workingDirectory string) *ServiceConfig {
+	return &ServiceConfig{uuid, connector, workingDirectory}
 }
 
 // Export the config

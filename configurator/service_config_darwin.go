@@ -3,7 +3,6 @@ package configurator
 import (
 	"bytes"
 	"fmt"
-	"os"
 	"path"
 	"strings"
 
@@ -12,12 +11,12 @@ import (
 
 // ServiceConfig interfaces with a remote meshblu server
 type ServiceConfig struct {
-	uuid, connector, workingDirectory, logDirectory string
+	uuid, connector, outputDirectory string
 }
 
 // NewServiceConfig constructs a new Meshblu instance
-func NewServiceConfig(uuid, connector, workingDirectory, logDirectory string) *ServiceConfig {
-	return &ServiceConfig{uuid, connector, workingDirectory, logDirectory}
+func NewServiceConfig(uuid, connector, outputDirectory string) *ServiceConfig {
+	return &ServiceConfig{uuid, connector, outputDirectory}
 }
 
 // Export the config
@@ -34,19 +33,20 @@ func (config *ServiceConfig) Export() ([]byte, error) {
 
 	buf := &bytes.Buffer{}
 	encoder := plist.NewEncoder(buf)
-	label := fmt.Sprintf("com.octoblu.%s", config.uuid)
+	label := GetServiceFileName(config.uuid)
 
-	startCmd := path.Join(config.workingDirectory, "start")
+	startCmd := path.Join(GetConnectorDirectory(config.outputDirectory, config.uuid), "start")
 	pArgs := []string{startCmd}
 	keepAlive := true
-	outPath := path.Join(config.logDirectory, fmt.Sprintf("%s.log", config.uuid))
-	errPath := path.Join(config.logDirectory, fmt.Sprintf("%s-error.log", config.uuid))
-	binPath := path.Join(os.Getenv("HOME"), "Library", "Application Support", "MeshbluConnectors", "bin")
+	logDirectory := GetLogDirectory(config.outputDirectory, config.uuid)
+	outPath := path.Join(logDirectory, fmt.Sprintf("%s.log", config.uuid))
+	errPath := path.Join(logDirectory, fmt.Sprintf("%s-error.log", config.uuid))
+	binPath := GetBinDirectory(config.outputDirectory)
 	env := map[string]string{
 		"PATH":              fmt.Sprintf("/sbin:/usr/sbin:/bin:/usr/bin:%s", binPath),
 		"MESHBLU_CONNECTOR": config.connector,
 	}
-	data := &ServiceData{label, pArgs, keepAlive, outPath, errPath, config.workingDirectory, env}
+	data := &ServiceData{label, pArgs, keepAlive, outPath, errPath, config.outputDirectory, env}
 	err := encoder.Encode(data)
 	if err != nil {
 		return nil, err
