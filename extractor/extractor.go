@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -34,6 +33,7 @@ func (client *Client) Do(source, target string) error {
 	var filesToRemove []string
 	var err error
 	if isGZ(source) {
+		fmt.Println("ungzipping...", source, target)
 		filesToRemove = append(filesToRemove, source)
 		source, err = client.Ungzip(source, target)
 		if err != nil {
@@ -41,6 +41,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	if isTar(source) {
+		fmt.Println("untaring...", source, target)
 		filesToRemove = append(filesToRemove, source)
 		err = client.Untar(source, target)
 		if err != nil {
@@ -48,6 +49,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	if isZip(source) {
+		fmt.Println("unzipping...", source, target)
 		filesToRemove = append(filesToRemove, source)
 		err = client.Unzip(source, target)
 		if err != nil {
@@ -55,6 +57,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	for _, fileToRemove := range filesToRemove {
+		fmt.Println("removing compressed file...", fileToRemove)
 		err = os.Remove(fileToRemove)
 		if err != nil {
 			return err
@@ -91,36 +94,57 @@ func (client *Client) Ungzip(source, target string) (string, error) {
 }
 
 // Unzip extracts a zip file
-func Unzip(source, target string) error {
+func (client *Client) Unzip(source, target string) error {
 	reader, err := zip.OpenReader(source)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		if err := reader.Close(); err != nil {
+			panic(err)
+		}
+	}()
 
-	if err := os.MkdirAll(target, 0755); err != nil {
-		return err
+	os.MkdirAll(target, 0755)
+
+	// Closure to address file descriptors issue with all the deferred .Close() methods
+	extractAndWriteFile := func(file *zip.File) error {
+		rc, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer func() {
+			if err := rc.Close(); err != nil {
+				panic(err)
+			}
+		}()
+
+		path := filepath.Join(target, file.Name)
+
+		if file.FileInfo().IsDir() {
+			os.MkdirAll(path, file.Mode())
+		} else {
+			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+			if err != nil {
+				return err
+			}
+			defer func() {
+				if err := f.Close(); err != nil {
+					panic(err)
+				}
+			}()
+
+			_, err = io.Copy(f, rc)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 
 	for _, file := range reader.File {
-		path := filepath.Join(target, file.Name)
-		if file.FileInfo().IsDir() {
-			os.MkdirAll(path, file.Mode())
-			continue
-		}
-
-		fileReader, err := file.Open()
+		err := extractAndWriteFile(file)
 		if err != nil {
-			return err
-		}
-		fileReader.Close()
-
-		targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
-		if err != nil {
-			return err
-		}
-		targetFile.Close()
-
-		if _, err := io.Copy(targetFile, fileReader); err != nil {
 			return err
 		}
 	}
@@ -178,35 +202,22 @@ func (client *Client) Untar(tarball, target string) error {
 	return nil
 }
 
-func getFileName(source string) (string, error) {
-	uri, err := url.Parse(source)
-	if err != nil {
-		return "", err
-	}
-	segments := strings.Split(uri.Path, "/")
-	return segments[len(segments)-1], nil
+func getFileName(source string) string {
+	segments := strings.Split(source, "/")
+	return segments[len(segments)-1]
 }
 
 func isGZ(source string) bool {
-	fileName, err := getFileName(source)
-	if err != nil {
-		return false
-	}
+	fileName := getFileName(source)
 	return strings.Index(fileName, ".gz") > -1
 }
 
 func isTar(source string) bool {
-	fileName, err := getFileName(source)
-	if err != nil {
-		return false
-	}
+	fileName := getFileName(source)
 	return strings.Index(fileName, ".tar") > -1
 }
 
 func isZip(source string) bool {
-	fileName, err := getFileName(source)
-	if err != nil {
-		return false
-	}
+	fileName := getFileName(source)
 	return strings.Index(fileName, ".zip") > -1
 }
