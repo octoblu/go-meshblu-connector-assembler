@@ -1,6 +1,7 @@
 package foreverizer
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -15,7 +16,12 @@ func Setup(uuid, connector, outputDirectory string) error {
 		return err
 	}
 
-	err = startService(uuid)
+	err = setEnvInService(uuid, outputDirectory)
+	if err != nil {
+		return err
+	}
+	
+	err = startService(uuid, outputDirectory)
 	if err != nil {
 		return err
 	}
@@ -32,11 +38,38 @@ func setupStructure(outputDirectory string) error {
 }
 
 func startService(uuid, outputDirectory string) error {
-	nssmExe := path.Join(configurator.GetBinDirectory(outputDirectory), "nssm.exe")
 	startExe := path.Join(configurator.GetConnectorDirectory(outputDirectory, uuid), "start.exe")
-	_, err := exec.Command(nssmExe, "install", startExe).Output()
+	_, err := exec.Command(getNSSM(outputDirectory), "install", getServiceName(uuid), startExe).Output()
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func setEnvInService(uuid, outputDirectory string) error {
+	_, err := exec.Command(
+		getNSSM(outputDirectory),
+		"set",
+		getServiceName(uuid),
+		"AppEnvironmentExtra",
+		fmt.Sprintf("PATH=%s", getPath(outputDirectory),
+	).Output()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func getNSSM(outputDirectory string) string {
+	return path.Join(configurator.GetBinDirectory(outputDirectory), "nssm.exe")
+}
+
+func getPath(outputDirectory string) string {
+	binPath := configurator.GetBinDirectory(outputDirectory)
+	npmPath := path.Join(binPath, "node_modules", "npm", "bin")
+	return fmt.Sprintf("%s:%s:%s", os.Getenv("PATH"), binPath, npmPath)
+}
+
+func getServiceName(uuid string) string {
+	return fmt.Sprintf("MeshbluConnector-%s", uuid)
 }
