@@ -11,16 +11,21 @@ func GetDefaultServiceDirectory() string {
 }
 
 // GetConnectorDirectory gets the OS specific connector path
-func GetConnectorDirectory(outputDirectory, uuid string) string {
-	return path.Join(outputDirectory, uuid)
+func GetConnectorDirectory(opts *Options) string {
+	return path.Join(opts.OutputDirectory, opts.UUID)
 }
 
 // GetLogDirectory gets the OS specific log directory
-func GetLogDirectory(outputDirectory, uuid string) string {
-	return path.Join(GetConnectorDirectory(outputDirectory, uuid), "log")
+func GetLogDirectory(opts *Options) string {
+	return path.Join(GetConnectorDirectory(opts.OutputDirectory, opts.UUID), "log")
 }
 
 // GetBinDirectory gets the OS specific log directory
-func GetBinDirectory(outputDirectory string) string {
-	return path.Join(outputDirectory, "bin")
+func GetBinDirectory(opts *Options) string {
+	return path.Join(opts.OutputDirectory, "bin")
+}
+
+// GetServiceFileName gets the OS specific log directory
+func GetServiceFileName(opts *Options) string {
+	return ""
 }

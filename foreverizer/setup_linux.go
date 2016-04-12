@@ -1,6 +1,6 @@
 package foreverizer
 
 // Setup configures the os to the device
-func Setup(uuid, connector, outputDirectory string) error {
+func Setup(opts *Options) error {
 	return nil
 }

@@ -12,31 +12,36 @@ func GetDefaultServiceDirectory() string {
 }
 
 // GetConnectorDirectory gets the OS specific connector path
-func GetConnectorDirectory(outputDirectory, uuid string) string {
-	return path.Join(outputDirectory, uuid)
+func GetConnectorDirectory(opts *Options) string {
+	return path.Join(opts.OutputDirectory, opts.UUID)
 }
 
 // GetBinDirectory gets the OS specific log directory
-func GetBinDirectory(outputDirectory string) string {
-	return path.Join(outputDirectory, "bin")
+func GetBinDirectory(opts *Options) string {
+	return path.Join(opts.OutputDirectory, "bin")
 }
 
 // GetLaunchFilePath gets the OS specific launch file directory
-func GetLaunchFilePath(uuid string) string {
-	return path.Join(os.Getenv("HOME"), "Library", "LaunchAgents", GetServiceFileName(uuid))
+func GetLaunchFilePath(opts *Options) string {
+	return path.Join(os.Getenv("HOME"), "Library", "LaunchAgents", GetServiceFileName(opts))
 }
 
 // GetLogDirectory gets the OS specific log directory
-func GetLogDirectory(outputDirectory, uuid string) string {
-	return path.Join(GetConnectorDirectory(outputDirectory, uuid), "log")
+func GetLogDirectory(opts *Options) string {
+	return path.Join(opts.ConnectorDirectory, "log")
+}
+
+// GetServiceName gets the OS specific service name
+func GetServiceName(opts *Options) string {
+	return fmt.Sprintf("com.octoblu.%s", opts.UUID)
 }
 
 // GetServiceFileName gets the OS specific service file
-func GetServiceFileName(uuid string) string {
-	return fmt.Sprintf("com.octoblu.%s.plist", uuid)
+func GetServiceFileName(opts *Options) string {
+	return fmt.Sprintf("%s.plist", GetServiceName(opts))
 }
 
 // GetServiceFilePath gets the OS specific service path
-func GetServiceFilePath(uuid, outputDirectory string) string {
-	return path.Join(outputDirectory, GetServiceFileName(uuid))
+func GetServiceFilePath(opts *Options) string {
+	return path.Join(opts.ConnectorDirectory, GetServiceFileName(opts))
 }

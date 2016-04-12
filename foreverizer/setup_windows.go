@@ -10,18 +10,18 @@ import (
 )
 
 // Setup configures the os to the device
-func Setup(uuid, connector, outputDirectory string) error {
-	err := setupStructure(outputDirectory)
+func Setup(opts *Options) error {
+	err := setupStructure(opts)
 	if err != nil {
 		return err
 	}
 
-	err = setEnvInService(uuid, outputDirectory)
+	err = setEnvInService(opts)
 	if err != nil {
 		return err
 	}
-	
-	err = startService(uuid, outputDirectory)
+
+	err = startService(opts)
 	if err != nil {
 		return err
 	}
@@ -29,30 +29,30 @@ func Setup(uuid, connector, outputDirectory string) error {
 	return nil
 }
 
-func setupStructure(outputDirectory string) error {
-	err := os.MkdirAll(configurator.GetLogDirectory(outputDirectory), 0777)
+func setupStructure(opts *Options) error {
+	err := os.MkdirAll(opts.LogDirectory, 0777)
 	if err != nil {
 		return err
 	}
 	return err
 }
 
-func startService(uuid, outputDirectory string) error {
-	startExe := path.Join(configurator.GetConnectorDirectory(outputDirectory, uuid), "start.exe")
-	_, err := exec.Command(getNSSM(outputDirectory), "install", getServiceName(uuid), startExe).Output()
+func startService(opts *Options) error {
+	startExe := path.Join(opts.ConnectorDirectory, "start.exe")
+	_, err := exec.Command(getNSSM(opts), "install", configurator.GetServiceFileName(opts), startExe).Output()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func setEnvInService(uuid, outputDirectory string) error {
+func setEnvInService(opts *Options) error {
 	_, err := exec.Command(
-		getNSSM(outputDirectory),
+		getNSSM(opts),
 		"set",
-		getServiceName(uuid),
+		configurator.ServiceName,
 		"AppEnvironmentExtra",
-		fmt.Sprintf("PATH=%s", getPath(outputDirectory),
+		fmt.Sprintf("PATH=%s", getPath(opts),
 	).Output()
 	if err != nil {
 		return err
@@ -60,16 +60,11 @@ func setEnvInService(uuid, outputDirectory string) error {
 	return nil
 }
 
-func getNSSM(outputDirectory string) string {
-	return path.Join(configurator.GetBinDirectory(outputDirectory), "nssm.exe")
+func getNSSM(opts *Options) string {
+	return path.Join(opts.BinDirectory, "nssm.exe")
 }
 
-func getPath(outputDirectory string) string {
-	binPath := configurator.GetBinDirectory(outputDirectory)
-	npmPath := path.Join(binPath, "node_modules", "npm", "bin")
-	return fmt.Sprintf("%s:%s:%s", os.Getenv("PATH"), binPath, npmPath)
-}
-
-func getServiceName(uuid string) string {
-	return fmt.Sprintf("MeshbluConnector-%s", uuid)
+func getPath(opts *Options) string {
+	npmPath := path.Join(opts.BinDirectory, "node_modules", "npm", "bin")
+	return fmt.Sprintf("%s:%s:%s", os.Getenv("PATH"), opts.BinDirectory, npmPath)
 }

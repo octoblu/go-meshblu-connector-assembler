@@ -11,7 +11,11 @@ type Config struct {
 }
 
 // NewConfig constructs a new Meshblu instance
-func NewConfig(UUID, Token, Hostname string, Port int) *Config {
+func NewConfig(opts *Options) *Config {
+	UUID := opts.UUID
+	Token := opts.Token
+	Hostname := opts.Hostname
+	Port := opts.Port
 	return &Config{UUID, Token, Hostname, Port}
 }
 

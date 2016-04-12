@@ -17,13 +17,13 @@ type Downloader interface {
 
 // Client interfaces with remote cdn
 type Client struct {
-	outputDirectory string
+	OutputDirectory string
 	baseURI         string
 }
 
 // New constructs new Downloader instance
-func New(outputDirectory string, baseURI string) Downloader {
-	return &Client{outputDirectory, baseURI}
+func New(OutputDirectory string, baseURI string) Downloader {
+	return &Client{OutputDirectory, baseURI}
 }
 
 // DownloadConnector downloads the connector the local directory
@@ -33,8 +33,9 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 		fmt.Println("Error on client.buildURI", err.Error())
 		return "", err
 	}
+	fmt.Println("Downloading connector...", uri)
 
-	downloadFile := path.Join(client.outputDirectory, "connector.tar.gz")
+	downloadFile := path.Join(client.OutputDirectory, "connector.tar.gz")
 	outputStream, err := os.Create(downloadFile)
 
 	if err != nil {
@@ -53,7 +54,7 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return "", fmt.Errorf("Meshblu register returned invalid response code: %v", response.StatusCode)
+		return "", fmt.Errorf("Download returned invalid response code: %v", response.StatusCode)
 	}
 
 	_, err = io.Copy(outputStream, response.Body)
