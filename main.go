@@ -71,7 +71,7 @@ func main() {
 
 func run(context *cli.Context) {
 	opts := getOpts(context)
-	platform := fmt.Sprintf("%s-%s-node-5.5", runtime.GOOS, runtime.GOARCH)
+	platform := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
 
 	fmt.Println("Creating directory...", opts.ConnectorDirectory)
 	err := os.MkdirAll(opts.ConnectorDirectory, 0755)
