@@ -17,7 +17,7 @@ func GetConnectorDirectory(opts *Options) string {
 
 // GetLogDirectory gets the OS specific log directory
 func GetLogDirectory(opts *Options) string {
-	return path.Join(GetConnectorDirectory(opts.OutputDirectory, opts.UUID), "log")
+	return path.Join(GetConnectorDirectory(opts), "log")
 }
 
 // GetBinDirectory gets the OS specific log directory
@@ -27,5 +27,10 @@ func GetBinDirectory(opts *Options) string {
 
 // GetServiceFileName gets the OS specific log directory
 func GetServiceFileName(opts *Options) string {
+	return ""
+}
+
+// GetServiceFileName gets the OS specific log directory
+func GetServiceName(opts *Options) string {
 	return ""
 }
