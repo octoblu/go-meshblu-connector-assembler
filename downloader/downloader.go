@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"runtime"
 )
 
 // Downloader interface with a way of downloading connector bundles
@@ -35,7 +36,7 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 	}
 	fmt.Println("Downloading connector...", uri)
 
-	downloadFile := path.Join(client.OutputDirectory, "connector.tar.gz")
+	downloadFile := path.Join(client.OutputDirectory, fmt.Sprintf("connector.%s", getExt()))
 	outputStream, err := os.Create(downloadFile)
 
 	if err != nil {
@@ -72,6 +73,14 @@ func (client *Client) buildURI(connector string, tag string, platform string) (s
 	if err != nil {
 		return "", err
 	}
-	uri.Path = fmt.Sprintf("/connectors/%v/%v/%v.bundle.tar.gz", connector, tag, platform)
+
+	uri.Path = fmt.Sprintf("/connectors/%v/%v/%v.bundle.%s", connector, tag, platform, getExt())
 	return uri.String(), nil
+}
+
+func getExt() string {
+	if runtime.GOOS == "windows" {
+		return "zip"
+	}
+	return "tar.gz"
 }
