@@ -16,7 +16,12 @@ func Setup(opts *configurator.Options) error {
 		return err
 	}
 
-	err = setEnvInService(opts)
+	err = setEnvInService(opts, getPath(opts))
+	if err != nil {
+		return err
+	}
+
+	err = setEnvInService(opts, fmt.Sprintf("MESHBLU_CONNECTOR=%s", opts.Connector))
 	if err != nil {
 		return err
 	}
@@ -30,34 +35,38 @@ func Setup(opts *configurator.Options) error {
 }
 
 func setupStructure(opts *configurator.Options) error {
-	err := os.MkdirAll(opts.LogDirectory, 0777)
-	if err != nil {
-		return err
+	return os.MkdirAll(opts.LogDirectory, 0777)
+}
+
+func getLegacyFlag(opts *configurator.Options) string {
+	if opts.Legacy {
+		return "--legacy"
 	}
-	return err
+	return ""
+}
+
+func getStartExe(opts *configurator.Options) string {
+	return path.Join(opts.ConnectorDirectory, "start.exe")
 }
 
 func startService(opts *configurator.Options) error {
-	startExe := path.Join(opts.ConnectorDirectory, "start")
-	_, err := exec.Command(getNSSMExe(opts), "install", opts.ServiceName, startExe).Output()
-	if err != nil {
-		return err
-	}
-	return nil
+	return exec.Command(
+		getNSSMExe(opts),
+		"install",
+		opts.ServiceName,
+		getStartExe(opts),
+		getLegacyFlag(opts),
+	).Run()
 }
 
-func setEnvInService(opts *configurator.Options) error {
-	_, err := exec.Command(
+func setEnvInService(opts *configurator.Options, env string) error {
+	return exec.Command(
 		getNSSMExe(opts),
 		"set",
 		opts.ServiceName,
 		"AppEnvironmentExtra",
-		getPath(opts),
-	).Output()
-	if err != nil {
-		return err
-	}
-	return nil
+		env,
+	).Run()
 }
 
 func getNSSMExe(opts *configurator.Options) string {
