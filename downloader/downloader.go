@@ -31,16 +31,17 @@ func New(OutputDirectory string, baseURI string) Downloader {
 func (client *Client) DownloadConnector(connector string, tag string, platform string) (string, error) {
 	uri, err := client.buildURI(connector, tag, platform)
 	if err != nil {
-		fmt.Println("Error on client.buildURI", err.Error())
+		fmt.Println("error formating url", err.Error())
 		return "", err
 	}
-	fmt.Println("Downloading connector...", uri)
+	fmt.Println("downloading connector: ", connector, tag, platform)
 
 	downloadFile := path.Join(client.OutputDirectory, fmt.Sprintf("connector.%s", getExt()))
+	fmt.Println("to: ", downloadFile)
 	outputStream, err := os.Create(downloadFile)
 
 	if err != nil {
-		fmt.Println("Error on os.Create", err.Error())
+		fmt.Println("error opening file to write to: ", err.Error())
 		return "", err
 	}
 
@@ -49,21 +50,24 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 	response, err := http.Get(uri)
 
 	if err != nil {
-		fmt.Println("Error on http.Get", err.Error())
+		fmt.Println("http error downloading: ", err.Error())
 		return "", err
 	}
+
 	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return "", fmt.Errorf("Download returned invalid response code: %v", response.StatusCode)
+		return "", fmt.Errorf("download returned invalid response code: %v", response.StatusCode)
 	}
 
 	_, err = io.Copy(outputStream, response.Body)
 
 	if err != nil {
-		fmt.Println("Error on io.Copy", err.Error())
+		fmt.Println("error downloading to file", err.Error())
 		return "", err
 	}
+
+	fmt.Println("downloaded connector!")
 
 	return downloadFile, nil
 }

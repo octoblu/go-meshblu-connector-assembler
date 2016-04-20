@@ -35,6 +35,7 @@ func Setup(opts *configurator.Options) error {
 }
 
 func setupStructure(opts *configurator.Options) error {
+	fmt.Println("setting up log directory")
 	return os.MkdirAll(opts.LogDirectory, 0777)
 }
 
@@ -50,6 +51,7 @@ func getStartExe(opts *configurator.Options) string {
 }
 
 func startService(opts *configurator.Options) error {
+	fmt.Println("starting service")
 	return exec.Command(
 		getNSSMExe(opts),
 		"install",
@@ -60,6 +62,7 @@ func startService(opts *configurator.Options) error {
 }
 
 func setEnvInService(opts *configurator.Options, env string) error {
+	fmt.Println("setting env for service", env)
 	return exec.Command(
 		getNSSMExe(opts),
 		"set",
@@ -75,5 +78,5 @@ func getNSSMExe(opts *configurator.Options) string {
 
 func getPath(opts *configurator.Options) string {
 	npmPath := path.Join(opts.BinDirectory, "node_modules", "npm", "bin")
-	return fmt.Sprintf("PATH=%s:%s:%s", os.Getenv("PATH"), opts.BinDirectory, npmPath)
+	return fmt.Sprintf("PATH=%s:%s:%s", opts.BinDirectory, npmPath, os.Getenv("PATH"))
 }

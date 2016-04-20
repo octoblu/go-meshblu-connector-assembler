@@ -73,28 +73,28 @@ func run(context *cli.Context) {
 	opts := getOpts(context)
 	platform := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
 
-	fmt.Println("Creating directory...", opts.ConnectorDirectory)
-	err := os.MkdirAll(opts.ConnectorDirectory, 0755)
-	fatalIfError("Error creating output directory", err)
+	fmt.Println("creating directory", opts.ConnectorDirectory)
+	err := os.MkdirAll(opts.ConnectorDirectory, 755)
+	fatalIfError("error creating output directory", err)
 
 	baseURI := "https://meshblu-connector.octoblu.com"
 	downloadClient := downloader.New(opts.ConnectorDirectory, baseURI)
 	downloadFile, err := downloadClient.DownloadConnector(getConnector(opts), opts.Tag, platform)
-	fatalIfError("Error downloading", err)
+	fatalIfError("error downloading", err)
 
 	extractorClient := extractor.New()
 	err = extractorClient.Do(downloadFile, opts.ConnectorDirectory)
-	fatalIfError("Error extracting:", err)
+	fatalIfError("error extracting:", err)
 
 	configuratorClient := configurator.New(opts)
 	err = configuratorClient.WriteMeshblu()
-	fatalIfError("Error writing meshblu config:", err)
+	fatalIfError("error writing meshblu config:", err)
 
 	foreverizerClient := foreverizer.New(opts)
 	err = foreverizerClient.Do()
-	fatalIfError("Error setuping device to run forever", err)
+	fatalIfError("error setuping device to run forever", err)
 
-	fmt.Println("Done installing")
+	fmt.Println("done installing")
 }
 
 func getConnector(opts *configurator.Options) string {

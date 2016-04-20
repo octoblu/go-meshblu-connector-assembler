@@ -23,6 +23,6 @@ func New(opts *configurator.Options) Foreverizer {
 
 // Do will run the setup
 func (client *Client) Do() error {
-	fmt.Println("Foreverizing...")
+	fmt.Println("foreverizing")
 	return Setup(client.opts)
 }

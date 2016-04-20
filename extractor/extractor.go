@@ -33,7 +33,7 @@ func (client *Client) Do(source, target string) error {
 	var filesToRemove []string
 	var err error
 	if isGZ(source) {
-		fmt.Println("ungzipping...", source, target)
+		fmt.Println("ungzipping", source, target)
 		filesToRemove = append(filesToRemove, source)
 		source, err = client.Ungzip(source, target)
 		if err != nil {
@@ -41,7 +41,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	if isTar(source) {
-		fmt.Println("untaring...", source, target)
+		fmt.Println("untaring", source, target)
 		filesToRemove = append(filesToRemove, source)
 		err = client.Untar(source, target)
 		if err != nil {
@@ -49,7 +49,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	if isZip(source) {
-		fmt.Println("unzipping...", source, target)
+		fmt.Println("unzipping", source, target)
 		filesToRemove = append(filesToRemove, source)
 		err = client.Unzip(source, target)
 		if err != nil {
@@ -57,7 +57,7 @@ func (client *Client) Do(source, target string) error {
 		}
 	}
 	for _, fileToRemove := range filesToRemove {
-		fmt.Println("removing compressed file...", fileToRemove)
+		fmt.Println("removing compressed file", fileToRemove)
 		err = os.Remove(fileToRemove)
 		if err != nil {
 			return err
@@ -105,7 +105,7 @@ func (client *Client) Unzip(source, target string) error {
 		}
 	}()
 
-	os.MkdirAll(target, 0755)
+	os.MkdirAll(target, 755)
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
 	extractAndWriteFile := func(file *zip.File) error {
