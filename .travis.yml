@@ -1,26 +1,28 @@
 language: go
 go:
 - '1.6'
+branches:
+  only:
+  - /^v[0-9]/
 before_install:
-- curl -o gpm https://raw.githubusercontent.com/pote/gpm/v1.3.2/bin/gpm
-- chmod +x "./gpm"
-- "./gpm"
+- echo "no before_install"
+install:
+- echo "no install"
+script:
+- echo "no tests"
 before_deploy:
 - "./cross-compile.sh"
-- mkdir -p deploy/go-meshblu-connector-installer/latest deploy/go-meshblu-connector-installer/$TRAVIS_TAG
-- cp tmp/cross/* deploy/go-meshblu-connector-installer/latest
-- cp tmp/cross/* deploy/go-meshblu-connector-installer/$TRAVIS_TAG
 deploy:
-  provider: s3
-  access_key_id: AKIAJH2D5IPIRHYJT5IA
-  secret_access_key:
-    secure: "OXkKy4r9QipYktDKlvXYtaWbSopEKhh+d8KuY+xR859Secj7iMR1tLrrwHLd5ytaLXjtFVawKAbYdH0nolnt3tt5xad9OxMp1D4Gd0HdnVFgtCI/O0lWl6c44dlfWQVbjtIooL9FV+43NS3LVsWlSVrbnuh0lJ2MsnJ6y9HnQP2B+tJicLPO847CbSxtA2YlVvB8UdJ2XuWXuKG+F2iCyueI9GVOUc0xta483FxiD0DUpKCSdJYGmPr+grebZRMiUXXsDAcbmddpiV801xsaEDypov0Liqs0+ECo0S6RYW37leZyjfgzcNqYS5U6UTF5qnjFMnP10QkzpcHUfEaawOl1PcyT9+QouzB2XQkMjNhPthwN7gzVpDvIsYf6gJV2wWLPrLXtfyrlWZZpwAShqSi9KnNH+A/emIahmDvoAIl6RvF4+zqcitVemQDDSWeTnzW2O+hAM/WOlZwS+YYe0bSMDM2z+sj6LgAN+NhoEfHYUiGbcNkpMjRmrlz6Chn4CKXYl1ee9JtRK+oxstTu4r8OEVmuPfRMpBf78BqnwUVHUcdyGlj4AyzCZ8bSNMVCm27sXdpOzXmhwQSIafX1T/ZbjG5DVSXl/Qe6vN5DIGIbk8IoJ76c2vC5enKXQRIDBJ3M9hXfxalX//owosSqELsGf4/lHj7QnSiTP6vVhOs="
-  bucket: meshblu-connector
-  region: us-west-2
+- provider: releases
+  api_key:
+    secure: "oh9i2WxMpNFCH5emF3575y+bi5eb9ZjGuHSopvy1Sj6PzhdWAPJHHHLIDvG2FZyeyd2uZnl3BrHa1fjWD/dS4XBuPCl5emf4CmyJIUBAa68q6ifGvL9GGOFwm74B0/jhZxngMSKdHbQnUpDYyP4TH+xIjM68sQpFmYBxS3INGeMxlXHIAaaF8NGRPaiMw7vFy6hr1nV8hXWGoV5E5kIOfFgWkD1R1+H6RPsCWmwqzPCAGBNcK/l6TqjnoT1hrKXZT1EpI09up8WFs4jLsDe1iwYbQ2SJxx9C6BoYniDvQEAkJE00K9bmcYiNfm4GHmZuSAb93fPInaH5vK/Jia2vldnL3BRWGahFILByDmTownfpzu7UdEVLxxIbJmzLfQ4u/CYq2fBsdxTdbG0WwsQNGeVL82WOWxaikIumgOFVkqySNw9jT7N8cU4S3psNUsqbBJtAyRi6nDFdztzlMVd0JZ0RYvA5Q+3C79mxRDtkY441fbOrl/atJ8+AQdKlSztiLWFtx2lSIbe6xFqAejvu4hnbNVTCjU9X2sjBrdYOcSBwwPQR3Lq20698dOu2qjF4S70EyMYAnd42bPLoKeElqnTFOBrMHCfLzvSCmktFS33/VG5SuSNILPr55hzw5x6qhGIKiYIWni8ateHFenytI5TmZiv0ldy0HhdASIGi7fg="
+  file:
+  - "tmp/meshblu-connector-installer-darwin-386"
+  - "tmp/meshblu-connector-installer-darwin-amd64"
+  - "tmp/meshblu-connector-installer-linux-386"
+  - "tmp/meshblu-connector-installer-linux-amd64"
+  - "tmp/meshblu-connector-installer-windows-386"
+  - "tmp/meshblu-connector-installer-windows-amd64"
   skip_cleanup: true
-  local-dir: deploy
-  detect_encoding: true
-  upload-dir: tools
   on:
     tags: true
-    repo: octoblu/go-meshblu-connector-installer

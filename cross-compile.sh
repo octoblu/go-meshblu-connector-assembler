@@ -1,15 +1,17 @@
 #!/bin/bash
 
-APP_NAME=meshblu-connector-installer
-TMP_DIR=$PWD/tmp/cross
-IMAGE_NAME=local/$APP_NAME
+TMP_DIR=$PWD/tmp
+
+if [ -z "$TMP_DIR" ]; then
+  echo "no tmp dir"
+  exit 1
+fi
 
 build() {
   for goos in darwin linux windows; do
     for goarch in 386 amd64; do
-      local filename="${APP_NAME}-${goos}-${goarch}"
-      echo "building: ${filename}"
-      env GOOS="$goos" GOARCH="$goarch" go build -a -ldflags '-s' -o "${TMP_DIR}/${filename}"
+      echo "building: ${goos}-${goarch}"
+      env GOOS="$goos" GOARCH="$goarch" ./build.sh "local" > /dev/null
     done
   done
 }
