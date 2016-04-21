@@ -10,7 +10,7 @@ import (
 // Options defines the command line arguments
 type Options struct {
 	Connector          string
-	Tag                string
+	DownloadURI        string
 	Legacy             bool
 	OutputDirectory    string
 	ConnectorDirectory string
@@ -41,15 +41,15 @@ func New(opts *Options) Configurator {
 func NewOptions(context *cli.Context) *Options {
 	return &Options{
 		context.String("connector"),
-		context.String("tag"),
+		context.String("download-uri"),
 		context.Bool("legacy"),
-		context.String("output"),
 		"",
 		"",
 		"",
 		"",
-		context.String("hostname"),
-		context.Int("port"),
+		"",
+		"meshblu.octoblu.com",
+		443,
 		context.String("uuid"),
 		context.String("token"),
 	}

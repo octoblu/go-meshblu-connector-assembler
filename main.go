@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"runtime"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -28,12 +27,12 @@ func main() {
 		cli.StringFlag{
 			Name:   "connector, c",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_CONNECTOR",
-			Usage:  "Meshblu connector name",
+			Usage:  "Connector name",
 		},
 		cli.StringFlag{
-			Name:   "hostname",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_HOSTNAME",
-			Usage:  "Meshblu device hostname",
+			Name:   "download-uri, d",
+			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_DOWNLOAD_URI",
+			Usage:  "Download URI",
 		},
 		cli.BoolFlag{
 			Name:   "legacy, l",
@@ -41,27 +40,12 @@ func main() {
 			Usage:  "Run legacy meshblu connector",
 		},
 		cli.StringFlag{
-			Name:   "output, o",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_OUTPUT",
-			Usage:  "Output directory",
-		},
-		cli.IntFlag{
-			Name:   "port, -p",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_PORT",
-			Usage:  "Meshblu device port",
-		},
-		cli.StringFlag{
-			Name:   "uuid, -u",
+			Name:   "uuid, u",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_UUID",
 			Usage:  "Meshblu device uuid",
 		},
 		cli.StringFlag{
-			Name:   "tag, t",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_TAG",
-			Usage:  "Tag version. Defaults to 'latest'",
-		},
-		cli.StringFlag{
-			Name:   "token",
+			Name:   "token, t",
 			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_TOKEN",
 			Usage:  "Meshblu device token",
 		},
@@ -71,15 +55,13 @@ func main() {
 
 func run(context *cli.Context) {
 	opts := getOpts(context)
-	platform := fmt.Sprintf("%s-%s", runtime.GOOS, runtime.GOARCH)
 
 	fmt.Println("creating directory", opts.ConnectorDirectory)
 	err := os.MkdirAll(opts.ConnectorDirectory, 755)
 	fatalIfError("error creating output directory", err)
 
-	baseURI := "https://meshblu-connector.octoblu.com"
-	downloadClient := downloader.New(opts.ConnectorDirectory, baseURI)
-	downloadFile, err := downloadClient.DownloadConnector(getConnector(opts), opts.Tag, platform)
+	downloadClient := downloader.New(opts.ConnectorDirectory)
+	downloadFile, err := downloadClient.Download(opts.DownloadURI)
 	fatalIfError("error downloading", err)
 
 	extractorClient := extractor.New()
@@ -97,29 +79,26 @@ func run(context *cli.Context) {
 	fmt.Println("done installing")
 }
 
-func getConnector(opts *configurator.Options) string {
-	if opts.Legacy {
-		return "run-legacy"
-	}
-	return opts.Connector
-}
-
 func getOpts(context *cli.Context) *configurator.Options {
 	opts := configurator.NewOptions(context)
 
-	if opts.Connector == "" || opts.UUID == "" || opts.Token == "" {
+	if opts.Connector == "" || opts.DownloadURI == "" || opts.UUID == "" || opts.Token == "" {
 		cli.ShowAppHelp(context)
 
 		if opts.Connector == "" {
-			color.Red("  Missing required flag --connector or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
+			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
+		}
+
+		if opts.DownloadURI == "" {
+			color.Red("  Missing required flag --download-uri, d or MESHBLU_CONNECTOR_INSTALLER_DOWNLOAD_URI")
 		}
 
 		if opts.UUID == "" {
-			color.Red("  Missing required flag --uuid or MESHBLU_CONNECTOR_INSTALLER_OUTPUT")
+			color.Red("  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_INSTALLER_UUID")
 		}
 
 		if opts.Token == "" {
-			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_INSTALLER_TOKEN")
+			color.Red("  Missing required flag --token, -t or MESHBLU_CONNECTOR_INSTALLER_TOKEN")
 		}
 		os.Exit(1)
 	}
@@ -134,18 +113,6 @@ func getOpts(context *cli.Context) *configurator.Options {
 	}
 	opts.OutputDirectory = outputDirectory
 	opts.ConnectorDirectory = configurator.GetConnectorDirectory(opts)
-
-	if opts.Hostname == "" {
-		opts.Hostname = "meshblu.octoblu.com"
-	}
-
-	if opts.Port == 0 {
-		opts.Port = 443
-	}
-
-	if opts.Tag == "" {
-		opts.Tag = "latest"
-	}
 
 	opts.LogDirectory = configurator.GetLogDirectory(opts)
 	opts.BinDirectory = configurator.GetBinDirectory(opts)

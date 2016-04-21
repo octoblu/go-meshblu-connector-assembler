@@ -4,39 +4,31 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
-	"runtime"
+	"strings"
 )
 
 // Downloader interface with a way of downloading connector bundles
 type Downloader interface {
-	DownloadConnector(connector string, tag string, platform string) (string, error)
-	buildURI(connector string, tag string, platform string) (string, error)
+	Download(downloadURI string) (string, error)
 }
 
 // Client interfaces with remote cdn
 type Client struct {
 	OutputDirectory string
-	baseURI         string
 }
 
 // New constructs new Downloader instance
-func New(OutputDirectory string, baseURI string) Downloader {
-	return &Client{OutputDirectory, baseURI}
+func New(OutputDirectory string) Downloader {
+	return &Client{OutputDirectory}
 }
 
-// DownloadConnector downloads the connector the local directory
-func (client *Client) DownloadConnector(connector string, tag string, platform string) (string, error) {
-	uri, err := client.buildURI(connector, tag, platform)
-	if err != nil {
-		fmt.Println("error formating url", err.Error())
-		return "", err
-	}
-	fmt.Println("downloading connector: ", connector, tag, platform)
+// Download downloads the connector the local directory
+func (client *Client) Download(downloadURI string) (string, error) {
+	fmt.Println("downloading connector: ", downloadURI)
 
-	downloadFile := path.Join(client.OutputDirectory, fmt.Sprintf("connector.%s", getExt()))
+	downloadFile := client.getDownloadFile(downloadURI)
 	fmt.Println("to: ", downloadFile)
 	outputStream, err := os.Create(downloadFile)
 
@@ -47,7 +39,7 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 
 	defer outputStream.Close()
 
-	response, err := http.Get(uri)
+	response, err := http.Get(downloadURI)
 
 	if err != nil {
 		fmt.Println("http error downloading: ", err.Error())
@@ -67,24 +59,17 @@ func (client *Client) DownloadConnector(connector string, tag string, platform s
 		return "", err
 	}
 
-	fmt.Println("downloaded connector!")
+	fmt.Println("downloaded!")
 
 	return downloadFile, nil
 }
 
-func (client *Client) buildURI(connector string, tag string, platform string) (string, error) {
-	uri, err := url.Parse(client.baseURI)
-	if err != nil {
-		return "", err
-	}
-
-	uri.Path = fmt.Sprintf("/connectors/%v/%v/%v.bundle.%s", connector, tag, platform, getExt())
-	return uri.String(), nil
+func (client *Client) getDownloadFile(downloadURI string) string {
+	fileName := getFileName(downloadURI)
+	return path.Join(client.OutputDirectory, fileName)
 }
 
-func getExt() string {
-	if runtime.GOOS == "windows" {
-		return "zip"
-	}
-	return "tar.gz"
+func getFileName(source string) string {
+	segments := strings.Split(source, "/")
+	return segments[len(segments)-1]
 }
