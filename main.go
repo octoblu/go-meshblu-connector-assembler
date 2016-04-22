@@ -9,44 +9,44 @@ import (
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
 	"github.com/fatih/color"
-	"github.com/octoblu/go-meshblu-connector-installer/configurator"
-	"github.com/octoblu/go-meshblu-connector-installer/downloader"
-	"github.com/octoblu/go-meshblu-connector-installer/extractor"
-	"github.com/octoblu/go-meshblu-connector-installer/foreverizer"
+	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
+	"github.com/octoblu/go-meshblu-connector-assembler/downloader"
+	"github.com/octoblu/go-meshblu-connector-assembler/extractor"
+	"github.com/octoblu/go-meshblu-connector-assembler/foreverizer"
 	De "github.com/tj/go-debug"
 )
 
-var debug = De.Debug("meshblu-connector-installer:main")
+var debug = De.Debug("meshblu-connector-assembler:main")
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "meshblu-connector-installer"
+	app.Name = "meshblu-connector-assembler"
 	app.Version = version()
 	app.Action = run
 	app.Flags = []cli.Flag{
 		cli.StringFlag{
 			Name:   "connector, c",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_CONNECTOR",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR",
 			Usage:  "Connector name",
 		},
 		cli.StringFlag{
 			Name:   "download-uri, d",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_DOWNLOAD_URI",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_DOWNLOAD_URI",
 			Usage:  "Download URI",
 		},
 		cli.BoolFlag{
 			Name:   "legacy, l",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_LEGACY",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_LEGACY",
 			Usage:  "Run legacy meshblu connector",
 		},
 		cli.StringFlag{
 			Name:   "uuid, u",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_UUID",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_UUID",
 			Usage:  "Meshblu device uuid",
 		},
 		cli.StringFlag{
 			Name:   "token, t",
-			EnvVar: "MESHBLU_CONNECTOR_INSTALLER_TOKEN",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TOKEN",
 			Usage:  "Meshblu device token",
 		},
 	}
@@ -86,19 +86,19 @@ func getOpts(context *cli.Context) *configurator.Options {
 		cli.ShowAppHelp(context)
 
 		if opts.Connector == "" {
-			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_INSTALLER_CONNECTOR")
+			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR")
 		}
 
 		if opts.DownloadURI == "" {
-			color.Red("  Missing required flag --download-uri, d or MESHBLU_CONNECTOR_INSTALLER_DOWNLOAD_URI")
+			color.Red("  Missing required flag --download-uri, d or MESHBLU_CONNECTOR_ASSEMBLER_DOWNLOAD_URI")
 		}
 
 		if opts.UUID == "" {
-			color.Red("  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_INSTALLER_UUID")
+			color.Red("  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_ASSEMBLER_UUID")
 		}
 
 		if opts.Token == "" {
-			color.Red("  Missing required flag --token, -t or MESHBLU_CONNECTOR_INSTALLER_TOKEN")
+			color.Red("  Missing required flag --token, -t or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN")
 		}
 		os.Exit(1)
 	}

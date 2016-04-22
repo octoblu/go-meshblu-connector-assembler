@@ -1,2 +1,2 @@
-# go-meshblu-connector-installer
-Meshblu connector installer for go
+# go-meshblu-connector-assembler
+Meshblu connector installer written in go

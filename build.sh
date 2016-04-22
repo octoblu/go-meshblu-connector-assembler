@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME=meshblu-connector-installer
+APP_NAME=meshblu-connector-assembler
 TMP_DIR=$PWD/tmp
 IMAGE_NAME=local/$APP_NAME
 

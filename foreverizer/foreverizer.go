@@ -3,7 +3,7 @@ package foreverizer
 import (
 	"fmt"
 
-	"github.com/octoblu/go-meshblu-connector-installer/configurator"
+	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 )
 
 // Foreverizer interfaces the long running services on the os

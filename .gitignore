@@ -22,8 +22,8 @@ _testmain.go
 *.exe
 *.test
 *.prof
-meshblu-connector-installer
-entrypoint/meshblu-connector-installer
-meshblu-connector-installer-go
-go-meshblu-connector-installer
+meshblu-connector-assembler
+entrypoint/meshblu-connector-assembler
+meshblu-connector-assembler-go
+go-meshblu-connector-assembler
 tmp
