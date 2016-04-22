@@ -105,7 +105,7 @@ func (client *Client) Unzip(source, target string) error {
 		}
 	}()
 
-	os.MkdirAll(target, 755)
+	os.MkdirAll(target, 0755)
 
 	// Closure to address file descriptors issue with all the deferred .Close() methods
 	extractAndWriteFile := func(file *zip.File) error {
