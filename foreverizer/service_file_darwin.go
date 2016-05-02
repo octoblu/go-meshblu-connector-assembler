@@ -2,6 +2,7 @@ package foreverizer
 
 import (
 	"bytes"
+	"fmt"
 	"path"
 	"strings"
 
@@ -54,24 +55,18 @@ func encodeServiceData(data *ServiceData) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func (config *ServiceConfig) getLegacyFlag() string {
-	if config.opts.GetLegacy() {
-		return "--legacy"
-	}
-	return ""
-}
-
 func (config *ServiceConfig) getServiceData() *ServiceData {
 	opts := config.opts
 	label := opts.GetServiceName()
 	startCmd := opts.GetExecutablePath()
-	pArgs := []string{startCmd, config.getLegacyFlag()}
+	pArgs := []string{startCmd, opts.GetLegacyFlag()}
 	keepAlive := true
 	outPath := path.Join(opts.GetLogDirectory(), "connector.log")
 	errPath := path.Join(opts.GetLogDirectory(), "connector-error.log")
 	env := map[string]string{
-		"PATH":              opts.GetPathEnv(),
-		"MESHBLU_CONNECTOR": opts.GetConnector(),
+		"PATH": opts.GetPathEnv(),
+		"MESHBLU_CONNECTOR_NAME":   opts.GetConnector(),
+		"MESHBLU_CONNECTOR_LEGACY": fmt.Sprintf("%v", opts.GetLegacy()),
 	}
 	return &ServiceData{label, pArgs, keepAlive, outPath, errPath, opts.GetConnectorDirectory(), env}
 }

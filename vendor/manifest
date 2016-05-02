@@ -100,6 +100,24 @@
 			"notests": true
 		},
 		{
+			"importpath": "golang.org/x/sys/windows/registry",
+			"repository": "https://go.googlesource.com/sys",
+			"vcs": "git",
+			"revision": "b776ec39b3e54652e09028aaaaac9757f4f8211a",
+			"branch": "master",
+			"path": "/windows/registry",
+			"notests": true
+		},
+		{
+			"importpath": "golang.org/x/sys/windows/svc",
+			"repository": "https://go.googlesource.com/sys",
+			"vcs": "git",
+			"revision": "b776ec39b3e54652e09028aaaaac9757f4f8211a",
+			"branch": "master",
+			"path": "/windows/svc",
+			"notests": true
+		},
+		{
 			"importpath": "gopkg.in/yaml.v2",
 			"repository": "https://gopkg.in/yaml.v2",
 			"vcs": "git",

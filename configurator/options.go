@@ -32,6 +32,7 @@ type Options interface {
 	GetDownloadURI() string
 	GetOutputDirectory() string
 	GetLegacy() bool
+	GetLegacyFlag() string
 	GetHostname() string
 	GetPort() int
 	GetUUID() string
@@ -95,9 +96,17 @@ func (opts *OptionsConfig) GetOutputDirectory() string {
 	return opts.OutputDirectory
 }
 
-// GetLegacy get legacy flag
+// GetLegacy get legacy bool
 func (opts *OptionsConfig) GetLegacy() bool {
 	return opts.Legacy
+}
+
+// GetLegacyFlag get legacy flag
+func (opts *OptionsConfig) GetLegacyFlag() string {
+	if opts.GetLegacy() {
+		return "--legacy"
+	}
+	return ""
 }
 
 // GetHostname get meshblu hostname
