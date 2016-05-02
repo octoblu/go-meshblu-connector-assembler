@@ -1,6 +1,7 @@
 package configurator
 
 import (
+	"fmt"
 	"log"
 	"path"
 	"path/filepath"

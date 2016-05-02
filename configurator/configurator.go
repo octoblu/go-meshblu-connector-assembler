@@ -22,8 +22,8 @@ func New(opts Options) Configurator {
 	return &Client{opts}
 }
 
-// WriteConfig writes the configuration for meshblu
-func (client *Client) WriteConfig() error {
+// WriteConfigs writes the configuration for meshblu
+func (client *Client) WriteConfigs() error {
 	err := client.WriteMeshbluConfig()
 	if err != nil {
 		return err
@@ -34,7 +34,6 @@ func (client *Client) WriteConfig() error {
 	}
 	return nil
 }
-
 
 // WriteMeshbluConfig writes the configuration for meshblu
 func (client *Client) WriteMeshbluConfig() error {
