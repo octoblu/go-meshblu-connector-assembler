@@ -1,12 +1,12 @@
-package configurator
+package foreverizer
 
 import (
 	"bytes"
-	"fmt"
 	"path"
 	"strings"
 
 	"github.com/DHowett/go-plist"
+	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 )
 
 // ServiceData config for the launchagent
@@ -22,11 +22,11 @@ type ServiceData struct {
 
 // ServiceConfig interfaces with a remote meshblu server
 type ServiceConfig struct {
-	opts *Options
+	opts configurator.Options
 }
 
 // NewServiceConfig constructs a new Meshblu instance
-func NewServiceConfig(opts *Options) *ServiceConfig {
+func NewServiceConfig(opts configurator.Options) *ServiceConfig {
 	return &ServiceConfig{opts}
 }
 
@@ -55,7 +55,7 @@ func encodeServiceData(data *ServiceData) ([]byte, error) {
 }
 
 func (config *ServiceConfig) getLegacyFlag() string {
-	if config.opts.Legacy {
+	if config.opts.GetLegacy() {
 		return "--legacy"
 	}
 	return ""
@@ -63,15 +63,15 @@ func (config *ServiceConfig) getLegacyFlag() string {
 
 func (config *ServiceConfig) getServiceData() *ServiceData {
 	opts := config.opts
-	label := opts.ServiceName
-	startCmd := path.Join(opts.ConnectorDirectory, "start")
+	label := opts.GetServiceName()
+	startCmd := opts.GetExecutablePath()
 	pArgs := []string{startCmd, config.getLegacyFlag()}
 	keepAlive := true
-	outPath := path.Join(opts.LogDirectory, fmt.Sprintf("%s.log", opts.UUID))
-	errPath := path.Join(opts.LogDirectory, fmt.Sprintf("%s-error.log", opts.UUID))
+	outPath := path.Join(opts.GetLogDirectory(), "connector.log")
+	errPath := path.Join(opts.GetLogDirectory(), "connector-error.log")
 	env := map[string]string{
-		"PATH":              fmt.Sprintf("/sbin:/usr/sbin:/bin:/usr/bin:%s", opts.BinDirectory),
-		"MESHBLU_CONNECTOR": opts.Connector,
+		"PATH":              opts.GetPathEnv(),
+		"MESHBLU_CONNECTOR": opts.GetConnector(),
 	}
-	return &ServiceData{label, pArgs, keepAlive, outPath, errPath, opts.ConnectorDirectory, env}
+	return &ServiceData{label, pArgs, keepAlive, outPath, errPath, opts.GetConnectorDirectory(), env}
 }

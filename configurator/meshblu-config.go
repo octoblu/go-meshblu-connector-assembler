@@ -10,12 +10,12 @@ type Config struct {
 	Port     int    `json:"port"`
 }
 
-// NewConfig constructs a new Meshblu instance
-func NewConfig(opts *Options) *Config {
-	UUID := opts.UUID
-	Token := opts.Token
-	Hostname := opts.Hostname
-	Port := opts.Port
+// NewMeshbluConfig constructs a new Meshblu instance
+func NewMeshbluConfig(opts Options) *Config {
+	UUID := opts.GetUUID()
+	Token := opts.GetToken()
+	Hostname := opts.GetHostname()
+	Port := opts.GetPort()
 	return &Config{UUID, Token, Hostname, Port}
 }
 

@@ -5,12 +5,13 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 )
 
 // Setup configures the os to the device
-func Setup(opts *configurator.Options) error {
+func Setup(opts configurator.Options) error {
 	err := setupStructure(opts)
 	if err != nil {
 		return err
@@ -33,9 +34,18 @@ func Setup(opts *configurator.Options) error {
 	return nil
 }
 
-func setupLaunchFile(opts *configurator.Options) error {
+func getLaunchFilePath(opts configurator.Options) string {
+	return path.Join(os.Getenv("HOME"), "Library", "LaunchAgents", opts.GetServiceName())
+}
+
+func getServiceFilePath(opts configurator.Options) string {
+	launchFilePath := getServiceFilePath(opts)
+	return fmt.Sprintf("%s.plist", launchFilePath)
+}
+
+func setupLaunchFile(opts configurator.Options) error {
 	fmt.Println("setting up launch file")
-	launchFilePath := configurator.GetLaunchFilePath(opts)
+	launchFilePath := getLaunchFilePath(opts)
 
 	fileExists, err := FilePathExists(launchFilePath)
 	if err != nil {
@@ -50,7 +60,7 @@ func setupLaunchFile(opts *configurator.Options) error {
 		}
 	}
 
-	err = os.Symlink(configurator.GetServiceFilePath(opts), launchFilePath)
+	err = os.Symlink(opts.GetExecutablePath(), launchFilePath)
 	if err != nil {
 		fmt.Println("error symlinking service file", err.Error())
 		return fmt.Errorf("os.Symlink: %v", err.Error())
@@ -58,9 +68,9 @@ func setupLaunchFile(opts *configurator.Options) error {
 	return nil
 }
 
-func setupStructure(opts *configurator.Options) error {
+func setupStructure(opts configurator.Options) error {
 	fmt.Println("setting up log directory")
-	err := os.MkdirAll(opts.LogDirectory, 0777)
+	err := os.MkdirAll(opts.GetLogDirectory(), 0777)
 	if err != nil {
 		fmt.Println("error creating log directory", err.Error())
 		return err
@@ -68,9 +78,10 @@ func setupStructure(opts *configurator.Options) error {
 	return err
 }
 
-func startService(opts *configurator.Options) error {
+func startService(opts configurator.Options) error {
 	fmt.Println("starting service")
-	_, err := exec.Command("launchctl", "load", configurator.GetLaunchFilePath(opts)).Output()
+	launchFilePath := getLaunchFilePath(opts)
+	_, err := exec.Command("launchctl", "load", launchFilePath).Output()
 	if err != nil {
 		fmt.Println("Error starting service", err.Error())
 		return err
@@ -78,15 +89,15 @@ func startService(opts *configurator.Options) error {
 	return nil
 }
 
-func writeServiceFile(opts *configurator.Options) error {
+func writeServiceFile(opts configurator.Options) error {
 	fmt.Println("writing service file")
-	serviceConfig := configurator.NewServiceConfig(opts)
+	serviceConfig := NewServiceConfig(opts)
 	fileBytes, err := serviceConfig.Export()
 	if err != nil {
 		fmt.Println("error exporting service config", err.Error())
 		return err
 	}
-	err = ioutil.WriteFile(configurator.GetServiceFilePath(opts), fileBytes, 0644)
+	err = ioutil.WriteFile(getServiceFilePath(opts), fileBytes, 0644)
 	if err != nil {
 		fmt.Println("error writing service file", err.Error())
 		return err

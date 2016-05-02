@@ -3,24 +3,7 @@ package configurator
 import (
 	"io/ioutil"
 	"path"
-
-	"github.com/codegangsta/cli"
 )
-
-// Options defines the command line arguments
-type Options struct {
-	Connector          string
-	DownloadURI        string
-	Legacy             bool
-	OutputDirectory    string
-	ConnectorDirectory string
-	LogDirectory       string
-	BinDirectory       string
-	ServiceName        string
-	Hostname           string
-	Port               int
-	UUID, Token        string
-}
 
 // Configurator interfaces writing configuration files
 type Configurator interface {
@@ -29,41 +12,23 @@ type Configurator interface {
 
 // Client interfaces the Configurator
 type Client struct {
-	opts *Options
+	opts Options
 }
 
 // New constructs a new Configurator client
-func New(opts *Options) Configurator {
+func New(opts Options) Configurator {
 	return &Client{opts}
-}
-
-// NewOptions should create an options points
-func NewOptions(context *cli.Context) *Options {
-	return &Options{
-		context.String("connector"),
-		context.String("download-uri"),
-		context.Bool("legacy"),
-		"",
-		"",
-		"",
-		"",
-		"",
-		"meshblu.octoblu.com",
-		443,
-		context.String("uuid"),
-		context.String("token"),
-	}
 }
 
 // WriteMeshblu writes the configuration for meshblu
 func (client *Client) WriteMeshblu() error {
-	config := NewConfig(client.opts)
+	config := NewMeshbluConfig(client.opts)
 	configJSON, err := config.ToJSON()
 	if err != nil {
 		return err
 	}
 
-	configFilePath := path.Join(client.opts.ConnectorDirectory, "meshblu.json")
+	configFilePath := path.Join(client.opts.GetConnectorDirectory(), "meshblu.json")
 	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0644)
 	if writeErr != nil {
 		return writeErr

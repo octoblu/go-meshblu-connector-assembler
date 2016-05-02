@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -56,16 +55,16 @@ func main() {
 func run(context *cli.Context) {
 	opts := getOpts(context)
 
-	fmt.Println("creating directory", opts.ConnectorDirectory)
-	err := os.MkdirAll(opts.ConnectorDirectory, 0755)
+	fmt.Println("creating directory", opts.GetConnectorDirectory())
+	err := os.MkdirAll(opts.GetConnectorDirectory(), 0755)
 	fatalIfError("error creating output directory", err)
 
-	downloadClient := downloader.New(opts.ConnectorDirectory)
-	downloadFile, err := downloadClient.Download(opts.DownloadURI)
+	downloadClient := downloader.New(opts.GetConnectorDirectory())
+	downloadFile, err := downloadClient.Download(opts.GetDownloadURI())
 	fatalIfError("error downloading", err)
 
 	extractorClient := extractor.New()
-	err = extractorClient.Do(downloadFile, opts.ConnectorDirectory)
+	err = extractorClient.Do(downloadFile, opts.GetConnectorDirectory())
 	fatalIfError("error extracting:", err)
 
 	configuratorClient := configurator.New(opts)
@@ -79,44 +78,29 @@ func run(context *cli.Context) {
 	fmt.Println("done installing")
 }
 
-func getOpts(context *cli.Context) *configurator.Options {
+func getOpts(context *cli.Context) configurator.Options {
 	opts := configurator.NewOptions(context)
 
-	if opts.Connector == "" || opts.DownloadURI == "" || opts.UUID == "" || opts.Token == "" {
+	if opts.GetConnector() == "" || opts.GetDownloadURI() == "" || opts.GetUUID() == "" || opts.GetToken() == "" {
 		cli.ShowAppHelp(context)
 
-		if opts.Connector == "" {
+		if opts.GetConnector() == "" {
 			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR")
 		}
 
-		if opts.DownloadURI == "" {
+		if opts.GetDownloadURI() == "" {
 			color.Red("  Missing required flag --download-uri, d or MESHBLU_CONNECTOR_ASSEMBLER_DOWNLOAD_URI")
 		}
 
-		if opts.UUID == "" {
+		if opts.GetUUID() == "" {
 			color.Red("  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_ASSEMBLER_UUID")
 		}
 
-		if opts.Token == "" {
+		if opts.GetToken() == "" {
 			color.Red("  Missing required flag --token, -t or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN")
 		}
 		os.Exit(1)
 	}
-
-	if opts.OutputDirectory == "" {
-		opts.OutputDirectory = configurator.GetDefaultServiceDirectory()
-	}
-
-	outputDirectory, err := filepath.Abs(opts.OutputDirectory)
-	if err != nil {
-		log.Fatalln("Invalid output directory:", err.Error())
-	}
-	opts.OutputDirectory = outputDirectory
-	opts.ConnectorDirectory = configurator.GetConnectorDirectory(opts)
-
-	opts.LogDirectory = configurator.GetLogDirectory(opts)
-	opts.BinDirectory = configurator.GetBinDirectory(opts)
-	opts.ServiceName = configurator.GetServiceName(opts)
 
 	return opts
 }

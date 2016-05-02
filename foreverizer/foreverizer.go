@@ -1,10 +1,6 @@
 package foreverizer
 
-import (
-	"fmt"
-
-	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
-)
+import "github.com/octoblu/go-meshblu-connector-assembler/configurator"
 
 // Foreverizer interfaces the long running services on the os
 type Foreverizer interface {
@@ -13,16 +9,15 @@ type Foreverizer interface {
 
 // Client defines the Foreverizer
 type Client struct {
-	opts *configurator.Options
+	opts configurator.Options
 }
 
 // New constructs a new Foreverizer
-func New(opts *configurator.Options) Foreverizer {
+func New(opts configurator.Options) Foreverizer {
 	return &Client{opts}
 }
 
 // Do will run the setup
 func (client *Client) Do() error {
-	fmt.Println("foreverizing")
-	return Setup(client.opts)
+	return nil
 }
