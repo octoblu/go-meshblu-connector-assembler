@@ -21,3 +21,8 @@ func (opts *OptionsConfig) GetPathEnv() string {
 	npmPath := path.Join(opts.GetBinDirectory(), "node_modules", "npm", "bin")
 	return fmt.Sprintf("PATH=%s:%s:%s", opts.GetBinDirectory(), npmPath, os.Getenv("PATH"))
 }
+
+// GetServiceName gets the OS specific log directory
+func (opts *OptionsConfig) GetServiceName() string {
+	return fmt.Sprintf("MeshbluConnector-%s", opts.UUID)
+}

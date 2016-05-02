@@ -68,8 +68,8 @@ func run(context *cli.Context) {
 	fatalIfError("error extracting:", err)
 
 	configuratorClient := configurator.New(opts)
-	err = configuratorClient.WriteMeshblu()
-	fatalIfError("error writing meshblu config:", err)
+	err = configuratorClient.WriteConfigs()
+	fatalIfError("error writing configs:", err)
 
 	foreverizerClient := foreverizer.New(opts)
 	err = foreverizerClient.Do()

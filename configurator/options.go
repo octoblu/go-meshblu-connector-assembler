@@ -28,6 +28,8 @@ type Options interface {
 	GetServiceName() string
 	GetExecutablePath() string
 	GetConnector() string
+	GetDisplayName() string
+	GetDescription() string
 	GetPathEnv() string
 	GetDownloadURI() string
 	GetOutputDirectory() string
@@ -76,14 +78,19 @@ func (opts *OptionsConfig) GetBinDirectory() string {
 	return path.Join(opts.OutputDirectory, "bin")
 }
 
-// GetServiceName gets the OS specific log directory
-func (opts *OptionsConfig) GetServiceName() string {
-	return opts.UUID
-}
-
 // GetConnector get connector name
 func (opts *OptionsConfig) GetConnector() string {
 	return opts.Connector
+}
+
+// GetDisplayName get service display name
+func (opts *OptionsConfig) GetDisplayName() string {
+	return fmt.Sprintf("MeshbluConnector %s", opts.GetUUID())
+}
+
+// GetDescription get service description
+func (opts *OptionsConfig) GetDescription() string {
+	return fmt.Sprintf("MeshbluConnector (%s) %s", opts.GetConnector(), opts.GetUUID())
 }
 
 // GetDownloadURI get download uri

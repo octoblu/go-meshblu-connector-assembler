@@ -20,3 +20,8 @@ func (opts *OptionsConfig) GetExecutablePath() string {
 func (opts *OptionsConfig) GetPathEnv() string {
 	return fmt.Sprintf("PATH=%s:%s", opts.GetBinDirectory(), os.Getenv("PATH"))
 }
+
+// GetServiceName gets the OS specific log directory
+func (opts *OptionsConfig) GetServiceName() string {
+	return fmt.Sprintf("MeshbluConnector-%s", opts.UUID)
+}

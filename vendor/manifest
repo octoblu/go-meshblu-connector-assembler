@@ -51,6 +51,22 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/kardianos/osext",
+			"repository": "https://github.com/kardianos/osext",
+			"vcs": "git",
+			"revision": "29ae4ffbc9a6fe9fb2bc5029050ce6996ea1d3bc",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/kardianos/service",
+			"repository": "https://github.com/kardianos/service",
+			"vcs": "git",
+			"revision": "d97d87340b4a0d418f4d266ca7b00ba1d31e0d5a",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/mattn/go-colorable",
 			"repository": "https://github.com/mattn/go-colorable",
 			"vcs": "git",
@@ -97,24 +113,6 @@
 			"vcs": "git",
 			"revision": "ff4a55a20a86994118644bbddc6a216da193cc13",
 			"branch": "master",
-			"notests": true
-		},
-		{
-			"importpath": "golang.org/x/sys/windows/registry",
-			"repository": "https://go.googlesource.com/sys",
-			"vcs": "git",
-			"revision": "b776ec39b3e54652e09028aaaaac9757f4f8211a",
-			"branch": "master",
-			"path": "/windows/registry",
-			"notests": true
-		},
-		{
-			"importpath": "golang.org/x/sys/windows/svc",
-			"repository": "https://go.googlesource.com/sys",
-			"vcs": "git",
-			"revision": "b776ec39b3e54652e09028aaaaac9757f4f8211a",
-			"branch": "master",
-			"path": "/windows/svc",
 			"notests": true
 		},
 		{
