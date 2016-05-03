@@ -30,7 +30,6 @@ func (client *Client) Do() error {
 	opts := client.opts
 	srvOptions := service.KeyValue{
 		"UserService": true,
-		"RunAtLoad":   true,
 		"KeepAlive":   true,
 	}
 	svcConfig := &service.Config{
@@ -46,6 +45,13 @@ func (client *Client) Do() error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("maybe stop and removing service...")
+	err = s.Uninstall()
+	if err != nil {
+		return err
+	}
+
 	fmt.Println("installing service...")
 	err = s.Install()
 	if err != nil {
