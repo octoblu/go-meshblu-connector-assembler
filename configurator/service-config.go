@@ -7,6 +7,9 @@ import (
 
 // ServiceConfig is the runner connector config structure.
 type ServiceConfig struct {
+	ServiceName   string
+	DisplayName   string
+	Description   string
 	ConnectorName string
 	Legacy        bool
 	Dir           string
@@ -25,6 +28,9 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		opts.GetPathEnv(),
 	}
 	return &ServiceConfig{
+		ServiceName:   opts.GetServiceName(),
+		DisplayName:   opts.GetDisplayName(),
+		Description:   opts.GetDescription(),
 		ConnectorName: opts.GetConnector(),
 		Legacy:        opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),

@@ -55,9 +55,9 @@ func main() {
 func run(context *cli.Context) {
 	opts := getOpts(context)
 
-	fmt.Println("creating directory", opts.GetConnectorDirectory())
-	err := os.MkdirAll(opts.GetConnectorDirectory(), 0755)
-	fatalIfError("error creating output directory", err)
+	fmt.Println("creating log directory", opts.GetLogDirectory())
+	err := os.MkdirAll(opts.GetLogDirectory(), 0755)
+	fatalIfError("error creating log directory", err)
 
 	downloadClient := downloader.New(opts.GetConnectorDirectory())
 	downloadFile, err := downloadClient.Download(opts.GetDownloadURI())
