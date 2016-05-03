@@ -25,3 +25,8 @@ func (opts *OptionsConfig) GetPathEnv() string {
 func (opts *OptionsConfig) GetServiceName() string {
 	return fmt.Sprintf("MeshbluConnector-%s", opts.UUID)
 }
+
+// GetUserName get service display name
+func (opts *OptionsConfig) GetUserName() (string, error) {
+	return "", nil
+}

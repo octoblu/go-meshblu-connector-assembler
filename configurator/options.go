@@ -3,7 +3,6 @@ package configurator
 import (
 	"fmt"
 	"log"
-	"os/user"
 	"path"
 	"path/filepath"
 
@@ -89,15 +88,6 @@ func (opts *OptionsConfig) GetConnector() string {
 // GetDisplayName get service display name
 func (opts *OptionsConfig) GetDisplayName() string {
 	return fmt.Sprintf("MeshbluConnector %s", opts.GetUUID())
-}
-
-// GetUserName get service display name
-func (opts *OptionsConfig) GetUserName() (string, error) {
-	currentUser, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	return currentUser.Username, nil
 }
 
 // GetDescription get service description

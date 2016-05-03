@@ -3,6 +3,7 @@ package configurator
 import (
 	"fmt"
 	"os"
+	"os/user"
 	"path"
 )
 
@@ -25,4 +26,13 @@ func (opts *OptionsConfig) GetPathEnv() string {
 // GetServiceName gets the OS specific log directory
 func (opts *OptionsConfig) GetServiceName() string {
 	return fmt.Sprintf("MeshbluConnector-%s", opts.UUID)
+}
+
+// GetUserName get service display name
+func (opts *OptionsConfig) GetUserName() (string, error) {
+	currentUser, err := user.Current()
+	if err != nil {
+		return "", err
+	}
+	return currentUser.Username, nil
 }
