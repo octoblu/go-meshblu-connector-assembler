@@ -32,11 +32,16 @@ func (client *Client) Do() error {
 		"UserService": true,
 		"KeepAlive":   true,
 	}
+	userName, err := opts.GetUserName()
+	if err != nil {
+		return err
+	}
 	svcConfig := &service.Config{
 		Name:        opts.GetServiceName(),
 		DisplayName: opts.GetDisplayName(),
 		Description: opts.GetDescription(),
 		Executable:  opts.GetExecutablePath(),
+		UserName:    userName,
 		Option:      srvOptions,
 	}
 
