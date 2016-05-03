@@ -47,10 +47,7 @@ func (client *Client) Do() error {
 	}
 
 	fmt.Println("maybe stop and removing service...")
-	err = s.Uninstall()
-	if err != nil {
-		return err
-	}
+	s.Uninstall()
 
 	fmt.Println("installing service...")
 	err = s.Install()
