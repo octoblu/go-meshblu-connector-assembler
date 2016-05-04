@@ -127,8 +127,9 @@ func fatalIfError(msg string, err error) {
 		return
 	}
 
-	log.Fatalln(msg, err.Error())
+	log.Println(msg, err.Error())
 	windowsMustWait()
+	log.Fatalln("Exiting...")
 }
 
 func windowsMustWait() {
