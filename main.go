@@ -1,11 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"runtime"
-	"time"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -134,8 +134,8 @@ func fatalIfError(msg string, err error) {
 
 func windowsMustWait() {
 	if runtime.GOOS == "windows" {
-		fmt.Println("waiting on windows")
-		time.Sleep(5 * time.Second)
+		fmt.Println("Press any key to continue >>>")
+		bufio.NewReader(os.Stdin).ReadBytes('\n')
 	}
 }
 
