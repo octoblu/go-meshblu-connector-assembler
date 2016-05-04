@@ -3,17 +3,17 @@ package configurator
 import (
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 // GetDefaultServiceDirectory gets the OS specific install directory
 func GetDefaultServiceDirectory() string {
-	return path.Join(os.Getenv("HOME"), ".octoblu", "MeshbluConnectors")
+	return filepath.Join(os.Getenv("HOME"), ".octoblu", "MeshbluConnectors")
 }
 
 // GetExecutablePath gets the OS specific service path
 func (opts *OptionsConfig) GetExecutablePath() string {
-	return path.Join(opts.GetConnectorDirectory(), "start")
+	return filepath.Join(opts.GetConnectorDirectory(), "start")
 }
 
 // GetPathEnv gets the OS specific PATH env

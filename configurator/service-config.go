@@ -2,7 +2,7 @@ package configurator
 
 import (
 	"encoding/json"
-	"path"
+	"path/filepath"
 )
 
 // ServiceConfig is the runner connector config structure.
@@ -31,8 +31,8 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		Legacy:        opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),
 		Env:           env,
-		Stderr:        path.Join(opts.GetLogDirectory(), "connector-error.log"),
-		Stdout:        path.Join(opts.GetLogDirectory(), "connector.log"),
+		Stderr:        filepath.Join(opts.GetLogDirectory(), "connector-error.log"),
+		Stdout:        filepath.Join(opts.GetLogDirectory(), "connector.log"),
 	}
 }
 

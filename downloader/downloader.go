@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -66,7 +66,7 @@ func (client *Client) Download(downloadURI string) (string, error) {
 
 func (client *Client) getDownloadFile(downloadURI string) string {
 	fileName := getFileName(downloadURI)
-	return path.Join(client.OutputDirectory, fileName)
+	return filepath.Join(client.OutputDirectory, fileName)
 }
 
 func getFileName(source string) string {

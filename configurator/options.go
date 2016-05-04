@@ -3,7 +3,6 @@ package configurator
 import (
 	"fmt"
 	"log"
-	"path"
 	"path/filepath"
 
 	"github.com/codegangsta/cli"
@@ -67,17 +66,17 @@ func NewOptions(context *cli.Context) Options {
 
 // GetConnectorDirectory gets the OS specific connector path
 func (opts *OptionsConfig) GetConnectorDirectory() string {
-	return path.Join(opts.OutputDirectory, opts.UUID)
+	return filepath.Join(opts.OutputDirectory, opts.UUID)
 }
 
 // GetLogDirectory gets the OS specific log directory
 func (opts *OptionsConfig) GetLogDirectory() string {
-	return path.Join(opts.GetConnectorDirectory(), "log")
+	return filepath.Join(opts.GetConnectorDirectory(), "log")
 }
 
 // GetBinDirectory gets the OS specific log directory
 func (opts *OptionsConfig) GetBinDirectory() string {
-	return path.Join(opts.OutputDirectory, "bin")
+	return filepath.Join(opts.OutputDirectory, "bin")
 }
 
 // GetConnector get connector name

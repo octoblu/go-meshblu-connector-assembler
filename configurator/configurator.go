@@ -2,7 +2,7 @@ package configurator
 
 import (
 	"io/ioutil"
-	"path"
+	"path/filepath"
 )
 
 // Configurator interfaces writing configuration files
@@ -43,7 +43,7 @@ func (client *Client) WriteMeshbluConfig() error {
 		return err
 	}
 
-	configFilePath := path.Join(client.opts.GetConnectorDirectory(), "meshblu.json")
+	configFilePath := filepath.Join(client.opts.GetConnectorDirectory(), "meshblu.json")
 	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0644)
 	if writeErr != nil {
 		return writeErr
@@ -59,7 +59,7 @@ func (client *Client) WriteServiceConfig() error {
 		return err
 	}
 
-	configFilePath := path.Join(client.opts.GetConnectorDirectory(), "service.json")
+	configFilePath := filepath.Join(client.opts.GetConnectorDirectory(), "service.json")
 	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0644)
 	if writeErr != nil {
 		return writeErr
