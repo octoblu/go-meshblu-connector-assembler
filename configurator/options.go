@@ -57,7 +57,7 @@ func NewOptions(context *cli.Context) Options {
 	}
 	ignitionTag := context.String("ignition")
 	if ignitionTag == "" {
-		ignitionTag = "v2.0.3"
+		ignitionTag = "v2.0.4"
 	}
 	return &OptionsConfig{
 		IgnitionTag:     ignitionTag,
