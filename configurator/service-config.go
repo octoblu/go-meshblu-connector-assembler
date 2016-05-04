@@ -11,6 +11,7 @@ type ServiceConfig struct {
 	DisplayName   string
 	Description   string
 	ConnectorName string
+	BinPath       string
 	Legacy        bool
 	Dir           string
 	Env           []string
@@ -28,6 +29,7 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		DisplayName:   opts.GetDisplayName(),
 		Description:   opts.GetDescription(),
 		ConnectorName: opts.GetConnector(),
+		BinPath:       opts.GetBinDirectory(),
 		Legacy:        opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),
 		Env:           env,

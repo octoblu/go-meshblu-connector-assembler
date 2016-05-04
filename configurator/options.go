@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"runtime"
 
 	"github.com/codegangsta/cli"
 )
 
 // OptionsConfig defines the service configurations
 type OptionsConfig struct {
+	IgnitionTag     string
 	Connector       string
 	DownloadURI     string
 	OutputDirectory string
@@ -22,6 +24,7 @@ type OptionsConfig struct {
 
 // Options defines the service configurations
 type Options interface {
+	GetIgnitionURI() string
 	GetConnectorDirectory() string
 	GetBinDirectory() string
 	GetLogDirectory() string
@@ -52,7 +55,12 @@ func NewOptions(context *cli.Context) Options {
 	if err != nil {
 		log.Fatalln("Invalid output directory:", err.Error())
 	}
+	ignitionTag := context.String("ignition")
+	if ignitionTag == "" {
+		ignitionTag = "v2.0.3"
+	}
 	return &OptionsConfig{
+		IgnitionTag:     ignitionTag,
 		Connector:       context.String("connector"),
 		DownloadURI:     context.String("download-uri"),
 		OutputDirectory: outputDirectory,
@@ -62,6 +70,12 @@ func NewOptions(context *cli.Context) Options {
 		UUID:            context.String("uuid"),
 		Token:           context.String("token"),
 	}
+}
+
+// GetIgnitionURI gets the OS specific connector path
+func (opts *OptionsConfig) GetIgnitionURI() string {
+	baseURI := "https://github.com/octoblu/go-meshblu-connector-ignition/releases/download"
+	return fmt.Sprintf("%s/%s/meshblu-connector-ignition-%s-%s", baseURI, opts.IgnitionTag, runtime.GOOS, runtime.GOARCH)
 }
 
 // GetConnectorDirectory gets the OS specific connector path

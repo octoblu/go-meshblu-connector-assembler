@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"runtime"
+	"time"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -39,6 +41,11 @@ func main() {
 			Usage:  "Run legacy meshblu connector",
 		},
 		cli.StringFlag{
+			Name:   "ignition, i",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_IGNITION_TAG",
+			Usage:  "Ignition Tag",
+		},
+		cli.StringFlag{
 			Name:   "uuid, u",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_UUID",
 			Usage:  "Meshblu device uuid",
@@ -71,11 +78,21 @@ func run(context *cli.Context) {
 	err = configuratorClient.WriteConfigs()
 	fatalIfError("error writing configs:", err)
 
+	ignitionFile, err := downloadClient.Download(opts.GetIgnitionURI())
+	fatalIfError("error downloading ignition", err)
+
+	err = os.Rename(ignitionFile, opts.GetExecutablePath())
+	fatalIfError("error moving ignition", err)
+
+	err = os.Chmod(opts.GetExecutablePath(), os.FileMode(int(0777)))
+	fatalIfError("error making exectuable", err)
+
 	foreverizerClient := foreverizer.New(opts)
 	err = foreverizerClient.Do()
 	fatalIfError("error setuping device to run forever", err)
 
 	fmt.Println("done installing")
+	windowsMustWait()
 }
 
 func getOpts(context *cli.Context) configurator.Options {
@@ -111,6 +128,14 @@ func fatalIfError(msg string, err error) {
 	}
 
 	log.Fatalln(msg, err.Error())
+	windowsMustWait()
+}
+
+func windowsMustWait() {
+	if runtime.GOOS == "windows" {
+		fmt.Println("waiting on windows")
+		time.Sleep(5 * time.Second)
+	}
 }
 
 func version() string {
