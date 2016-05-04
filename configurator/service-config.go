@@ -14,16 +14,12 @@ type ServiceConfig struct {
 	BinPath       string
 	Legacy        bool
 	Dir           string
-	Env           []string
 
 	Stderr, Stdout string
 }
 
 // NewServiceConfig constructs a new Meshblu instance
 func NewServiceConfig(opts Options) *ServiceConfig {
-	env := []string{
-		opts.GetPathEnv(),
-	}
 	return &ServiceConfig{
 		ServiceName:   opts.GetServiceName(),
 		DisplayName:   opts.GetDisplayName(),
@@ -32,7 +28,6 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		BinPath:       opts.GetBinDirectory(),
 		Legacy:        opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),
-		Env:           env,
 		Stderr:        filepath.Join(opts.GetLogDirectory(), "connector-error.log"),
 		Stdout:        filepath.Join(opts.GetLogDirectory(), "connector.log"),
 	}

@@ -34,7 +34,6 @@ type Options interface {
 	GetDisplayName() string
 	GetUserName() (string, error)
 	GetDescription() string
-	GetPathEnv() string
 	GetDownloadURI() string
 	GetOutputDirectory() string
 	GetLegacy() bool
@@ -57,7 +56,7 @@ func NewOptions(context *cli.Context) Options {
 	}
 	ignitionTag := context.String("ignition")
 	if ignitionTag == "" {
-		ignitionTag = "v2.0.4"
+		ignitionTag = "v3.0.0"
 	}
 	return &OptionsConfig{
 		IgnitionTag:     ignitionTag,
