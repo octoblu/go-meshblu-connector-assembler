@@ -2,6 +2,7 @@ package foreverizer
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/kardianos/service"
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
@@ -28,8 +29,12 @@ func New(opts configurator.Options) Foreverizer {
 func (client *Client) Do() error {
 	fmt.Println("foreverizing...")
 	opts := client.opts
+	userService := true
+	if runtime.GOOS == "linux" {
+		userService = false
+	}
 	srvOptions := service.KeyValue{
-		"UserService": true,
+		"UserService": userService,
 		"KeepAlive":   true,
 	}
 	svcConfig := &service.Config{
