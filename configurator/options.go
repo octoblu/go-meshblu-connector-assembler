@@ -44,8 +44,8 @@ type Options interface {
 	GetToken() string
 }
 
-// NewOptions should create an options points
-func NewOptions(context *cli.Context) Options {
+// NewOptionsFromContext should create an options interface from the context
+func NewOptionsFromContext(context *cli.Context) Options {
 	outputDirectory := context.String("output")
 	if outputDirectory == "" {
 		outputDirectory = GetDefaultServiceDirectory()
@@ -56,7 +56,7 @@ func NewOptions(context *cli.Context) Options {
 	}
 	ignitionTag := context.String("ignition")
 	if ignitionTag == "" {
-		ignitionTag = "v3.0.3"
+		ignitionTag = "v3.0.4"
 	}
 	return &OptionsConfig{
 		IgnitionTag:     ignitionTag,
@@ -69,6 +69,25 @@ func NewOptions(context *cli.Context) Options {
 		UUID:            context.String("uuid"),
 		Token:           context.String("token"),
 	}
+}
+
+// NewOptions should create an options interface
+func NewOptions(optConfig *OptionsConfig) Options {
+	outputDirectory := optConfig.OutputDirectory
+	if outputDirectory == "" {
+		outputDirectory = GetDefaultServiceDirectory()
+	}
+	outputDirectory, err := filepath.Abs(outputDirectory)
+	if err != nil {
+		log.Fatalln("Invalid output directory:", err.Error())
+	}
+	ignitionTag := optConfig.IgnitionTag
+	if ignitionTag == "" {
+		ignitionTag = "v3.0.3"
+	}
+	optConfig.IgnitionTag = ignitionTag
+	optConfig.OutputDirectory = outputDirectory
+	return optConfig
 }
 
 // GetIgnitionURI gets the OS specific connector path
@@ -85,11 +104,6 @@ func (opts *OptionsConfig) GetConnectorDirectory() string {
 // GetLogDirectory gets the OS specific log directory
 func (opts *OptionsConfig) GetLogDirectory() string {
 	return filepath.Join(opts.GetConnectorDirectory(), "log")
-}
-
-// GetBinDirectory gets the OS specific log directory
-func (opts *OptionsConfig) GetBinDirectory() string {
-	return filepath.Join(opts.OutputDirectory, "bin")
 }
 
 // GetConnector get connector name

@@ -62,9 +62,17 @@ func main() {
 func run(context *cli.Context) {
 	opts := getOpts(context)
 
-	fmt.Println("creating log directory", opts.GetLogDirectory())
-	err := os.MkdirAll(opts.GetLogDirectory(), 0755)
-	fatalIfError("error creating log directory", err)
+	fmt.Println("creating output directory")
+	err := os.MkdirAll(opts.GetOutputDirectory(), 0755)
+	fatalIfError("create output directory", err)
+
+	fmt.Println("creating log directory")
+	err = os.MkdirAll(opts.GetLogDirectory(), 0755)
+	fatalIfError("create log directory", err)
+
+	fmt.Println("creating bin directory")
+	err = os.MkdirAll(opts.GetBinDirectory(), 0755)
+	fatalIfError("create bin directory", err)
 
 	downloadClient := downloader.New(opts.GetConnectorDirectory())
 	downloadFile, err := downloadClient.Download(opts.GetDownloadURI())
@@ -96,7 +104,7 @@ func run(context *cli.Context) {
 }
 
 func getOpts(context *cli.Context) configurator.Options {
-	opts := configurator.NewOptions(context)
+	opts := configurator.NewOptionsFromContext(context)
 
 	if opts.GetConnector() == "" || opts.GetDownloadURI() == "" || opts.GetUUID() == "" || opts.GetToken() == "" {
 		cli.ShowAppHelp(context)

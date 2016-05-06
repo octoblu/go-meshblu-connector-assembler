@@ -8,7 +8,12 @@ import (
 
 // GetDefaultServiceDirectory gets the OS specific install directory
 func GetDefaultServiceDirectory() string {
-	return filepath.Join(os.Getenv("HOME"), "Library", "Application Support", "MeshbluConnectors")
+	return filepath.Join(os.Getenv("HOME"), ".octoblu", "MeshbluConnectors")
+}
+
+// GetBinDirectory gets the OS specific log directory
+func (opts *OptionsConfig) GetBinDirectory() string {
+	return filepath.Join(opts.GetOutputDirectory(), "bin")
 }
 
 // GetExecutablePath gets the OS specific service path
