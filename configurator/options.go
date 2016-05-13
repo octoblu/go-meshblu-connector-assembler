@@ -16,7 +16,7 @@ type OptionsConfig struct {
 	GithubSlug      string
 	Tag             string
 	OutputDirectory string
-	Legacy          bool
+	Legacy          string
 	ServiceName     string
 	Hostname        string
 	Port            int
@@ -39,8 +39,7 @@ type Options interface {
 	GetDescription() string
 	GetDownloadURI() string
 	GetOutputDirectory() string
-	GetLegacy() bool
-	GetLegacyFlag() string
+	GetLegacy() string
 	GetHostname() string
 	GetPort() int
 	GetUUID() string
@@ -67,7 +66,7 @@ func NewOptionsFromContext(context *cli.Context) Options {
 		GithubSlug:      context.String("github-slug"),
 		Tag:             context.String("tag"),
 		OutputDirectory: outputDirectory,
-		Legacy:          context.Bool("legacy"),
+		Legacy:          context.String("legacy"),
 		Hostname:        "meshblu.octoblu.com",
 		Port:            443,
 		UUID:            context.String("uuid"),
@@ -137,13 +136,19 @@ func (opts *OptionsConfig) GetDescription() string {
 
 // GetDownloadURI get download uri
 func (opts *OptionsConfig) GetDownloadURI() string {
+	tag := opts.GetTag()
+	connector := opts.GetConnector()
+	if opts.GetLegacy() != "" {
+		tag = opts.GetLegacy()
+		connector = "run-legacy"
+	}
 	baseURI := fmt.Sprintf("https://github.com/%s/releases/download", opts.GithubSlug)
 	ext := "tar.gz"
 	if runtime.GOOS == "windows" {
 		ext = "zip"
 	}
-	fileName := fmt.Sprintf("%s-%s-%s.%s", opts.Connector, runtime.GOOS, runtime.GOARCH, ext)
-	return fmt.Sprintf("%s/%s/%s", baseURI, opts.Tag, fileName)
+	fileName := fmt.Sprintf("%s-%s-%s.%s", connector, runtime.GOOS, runtime.GOARCH, ext)
+	return fmt.Sprintf("%s/%s/%s", baseURI, tag, fileName)
 }
 
 // GetOutputDirectory get output directory
@@ -152,16 +157,8 @@ func (opts *OptionsConfig) GetOutputDirectory() string {
 }
 
 // GetLegacy get legacy bool
-func (opts *OptionsConfig) GetLegacy() bool {
+func (opts *OptionsConfig) GetLegacy() string {
 	return opts.Legacy
-}
-
-// GetLegacyFlag get legacy flag
-func (opts *OptionsConfig) GetLegacyFlag() string {
-	if opts.GetLegacy() {
-		return "--legacy"
-	}
-	return ""
 }
 
 // GetHostname get meshblu hostname

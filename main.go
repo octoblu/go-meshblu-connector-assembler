@@ -40,10 +40,10 @@ func main() {
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TAG",
 			Usage:  "Tag or Version",
 		},
-		cli.BoolFlag{
+		cli.StringFlag{
 			Name:   "legacy, l",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_LEGACY",
-			Usage:  "Run legacy meshblu connector",
+			Usage:  "Legacy Version",
 		},
 		cli.StringFlag{
 			Name:   "ignition, i",
