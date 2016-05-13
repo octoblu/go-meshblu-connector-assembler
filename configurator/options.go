@@ -13,7 +13,8 @@ import (
 type OptionsConfig struct {
 	IgnitionTag     string
 	Connector       string
-	DownloadURI     string
+	GithubSlug      string
+	Tag             string
 	OutputDirectory string
 	Legacy          bool
 	ServiceName     string
@@ -31,6 +32,8 @@ type Options interface {
 	GetServiceName() string
 	GetExecutablePath() string
 	GetConnector() string
+	GetGithubSlug() string
+	GetTag() string
 	GetDisplayName() string
 	GetUserName() (string, error)
 	GetDescription() string
@@ -61,7 +64,8 @@ func NewOptionsFromContext(context *cli.Context) Options {
 	return &OptionsConfig{
 		IgnitionTag:     ignitionTag,
 		Connector:       context.String("connector"),
-		DownloadURI:     context.String("download-uri"),
+		GithubSlug:      context.String("github-slug"),
+		Tag:             context.String("tag"),
 		OutputDirectory: outputDirectory,
 		Legacy:          context.Bool("legacy"),
 		Hostname:        "meshblu.octoblu.com",
@@ -111,6 +115,16 @@ func (opts *OptionsConfig) GetConnector() string {
 	return opts.Connector
 }
 
+// GetGithubSlug get connector name
+func (opts *OptionsConfig) GetGithubSlug() string {
+	return opts.GithubSlug
+}
+
+// GetTag get connector name
+func (opts *OptionsConfig) GetTag() string {
+	return opts.Tag
+}
+
 // GetDisplayName get service display name
 func (opts *OptionsConfig) GetDisplayName() string {
 	return fmt.Sprintf("MeshbluConnector %s", opts.GetUUID())
@@ -123,7 +137,8 @@ func (opts *OptionsConfig) GetDescription() string {
 
 // GetDownloadURI get download uri
 func (opts *OptionsConfig) GetDownloadURI() string {
-	return opts.DownloadURI
+	baseURI := fmt.Sprintf("https://github.com/%s/releases/download", opts.GithubSlug)
+	return fmt.Sprintf("%s/%s/%s-%s-%s", baseURI, opts.Tag, opts.Connector, runtime.GOOS, runtime.GOARCH)
 }
 
 // GetOutputDirectory get output directory

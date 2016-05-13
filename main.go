@@ -31,9 +31,14 @@ func main() {
 			Usage:  "Connector name",
 		},
 		cli.StringFlag{
-			Name:   "download-uri, d",
-			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_DOWNLOAD_URI",
-			Usage:  "Download URI",
+			Name:   "github-slug, g",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG",
+			Usage:  "Github Slug",
+		},
+		cli.StringFlag{
+			Name:   "tag",
+			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TAG",
+			Usage:  "Tag or Version",
 		},
 		cli.BoolFlag{
 			Name:   "legacy, l",
@@ -51,7 +56,7 @@ func main() {
 			Usage:  "Meshblu device uuid",
 		},
 		cli.StringFlag{
-			Name:   "token, t",
+			Name:   "token",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TOKEN",
 			Usage:  "Meshblu device token",
 		},
@@ -106,15 +111,24 @@ func run(context *cli.Context) {
 func getOpts(context *cli.Context) configurator.Options {
 	opts := configurator.NewOptionsFromContext(context)
 
-	if opts.GetConnector() == "" || opts.GetDownloadURI() == "" || opts.GetUUID() == "" || opts.GetToken() == "" {
+	if opts.GetConnector() == "" ||
+		opts.GetGithubSlug() == "" ||
+		opts.GetTag() == "" ||
+		opts.GetUUID() == "" ||
+		opts.GetToken() == "" {
+
 		cli.ShowAppHelp(context)
 
 		if opts.GetConnector() == "" {
 			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR")
 		}
 
-		if opts.GetDownloadURI() == "" {
-			color.Red("  Missing required flag --download-uri, d or MESHBLU_CONNECTOR_ASSEMBLER_DOWNLOAD_URI")
+		if opts.GetGithubSlug() == "" {
+			color.Red("  Missing required flag --github-slug, g or MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG")
+		}
+
+		if opts.GetTag() == "" {
+			color.Red("  Missing required flag --tag or MESHBLU_CONNECTOR_ASSEMBLER_TAG")
 		}
 
 		if opts.GetUUID() == "" {
@@ -122,7 +136,7 @@ func getOpts(context *cli.Context) configurator.Options {
 		}
 
 		if opts.GetToken() == "" {
-			color.Red("  Missing required flag --token, -t or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN")
+			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN")
 		}
 		os.Exit(1)
 	}

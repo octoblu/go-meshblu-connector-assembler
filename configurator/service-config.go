@@ -11,6 +11,8 @@ type ServiceConfig struct {
 	DisplayName   string
 	Description   string
 	ConnectorName string
+	GithubSlug    string
+	Tag           string
 	BinPath       string
 	Legacy        bool
 	Dir           string
@@ -25,6 +27,8 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		DisplayName:   opts.GetDisplayName(),
 		Description:   opts.GetDescription(),
 		ConnectorName: opts.GetConnector(),
+		GithubSlug:    opts.GetGithubSlug(),
+		Tag:           opts.GetTag(),
 		BinPath:       opts.GetBinDirectory(),
 		Legacy:        opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),
