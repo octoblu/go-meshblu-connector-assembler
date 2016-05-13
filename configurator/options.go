@@ -86,7 +86,7 @@ func NewOptions(optConfig *OptionsConfig) Options {
 	}
 	ignitionTag := optConfig.IgnitionTag
 	if ignitionTag == "" {
-		ignitionTag = "v3.0.3"
+		ignitionTag = "v4.1.0"
 	}
 	optConfig.IgnitionTag = ignitionTag
 	optConfig.OutputDirectory = outputDirectory
