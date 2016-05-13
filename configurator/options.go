@@ -138,7 +138,12 @@ func (opts *OptionsConfig) GetDescription() string {
 // GetDownloadURI get download uri
 func (opts *OptionsConfig) GetDownloadURI() string {
 	baseURI := fmt.Sprintf("https://github.com/%s/releases/download", opts.GithubSlug)
-	return fmt.Sprintf("%s/%s/%s-%s-%s", baseURI, opts.Tag, opts.Connector, runtime.GOOS, runtime.GOARCH)
+	ext := "tar.gz"
+	if runtime.GOOS == "windows" {
+		ext = "zip"
+	}
+	fileName := fmt.Sprintf("%s-%s-%s.%s", opts.Connector, runtime.GOOS, runtime.GOARCH, ext)
+	return fmt.Sprintf("%s/%s/%s", baseURI, opts.Tag, fileName)
 }
 
 // GetOutputDirectory get output directory
