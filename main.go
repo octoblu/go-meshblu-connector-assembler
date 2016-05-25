@@ -30,13 +30,17 @@ func main() {
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR",
 			Usage:  "Connector name",
 		},
+		cli.BoolFlag{
+			Name:  "debug, d",
+			Usage: "Debug mode, will prompt for user to continue on Windows",
+		},
 		cli.StringFlag{
 			Name:   "github-slug, g",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG",
 			Usage:  "Github Slug",
 		},
 		cli.StringFlag{
-			Name:   "tag",
+			Name:   "tag, T",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TAG",
 			Usage:  "Tag or Version",
 		},
@@ -56,7 +60,7 @@ func main() {
 			Usage:  "Meshblu device uuid",
 		},
 		cli.StringFlag{
-			Name:   "token",
+			Name:   "token, t",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_TOKEN",
 			Usage:  "Meshblu device token",
 		},
@@ -67,94 +71,94 @@ func main() {
 func run(context *cli.Context) {
 	opts := getOpts(context)
 
-	fmt.Println("creating output directory")
-	err := os.MkdirAll(opts.GetOutputDirectory(), 0755)
-	fatalIfError("create output directory", err)
+	createDirectories(opts)
 
-	fmt.Println("creating log directory")
-	err = os.MkdirAll(opts.GetLogDirectory(), 0755)
-	fatalIfError("create log directory", err)
+	downloadConnector(opts)
 
-	fmt.Println("creating bin directory")
-	err = os.MkdirAll(opts.GetBinDirectory(), 0755)
-	fatalIfError("create bin directory", err)
+	writeConfiguration(opts)
 
-	downloadClient := downloader.New(opts.GetConnectorDirectory())
-	downloadFile, err := downloadClient.Download(opts.GetDownloadURI())
-	fatalIfError("error downloading", err)
+	installIgnition(opts)
 
-	extractorClient := extractor.New()
-	err = extractorClient.Do(downloadFile, opts.GetConnectorDirectory())
-	fatalIfError("error extracting:", err)
+	foreverize(opts)
 
+	debug("done installing")
+	windowsMustWait(opts)
+}
+
+func writeConfiguration(opts configurator.Options) {
+	debug("writing conifuration files")
 	configuratorClient := configurator.New(opts)
-	err = configuratorClient.WriteConfigs()
-	fatalIfError("error writing configs:", err)
+	err := configuratorClient.WriteConfigs()
+	fatalIfError(opts, "error writing configs:", err)
+}
 
-	ignitionFile, err := downloadClient.Download(opts.GetIgnitionURI())
-	fatalIfError("error downloading ignition", err)
+func downloadConnector(opts configurator.Options) {
+	debug("downloading the connector")
+	client := extractor.New()
+	err := client.DoWithURI(opts.GetDownloadURI(), opts.GetConnectorDirectory())
+	fatalIfError(opts, "error downloading:", err)
+}
+
+func createDirectories(opts configurator.Options) {
+	debug("creating directories")
+	err := os.MkdirAll(opts.GetOutputDirectory(), 0755)
+	fatalIfError(opts, "create output directory", err)
+
+	debug("creating log directory")
+	err = os.MkdirAll(opts.GetLogDirectory(), 0755)
+	fatalIfError(opts, "create log directory", err)
+
+	debug("creating bin directory")
+	err = os.MkdirAll(opts.GetBinDirectory(), 0755)
+	fatalIfError(opts, "create bin directory", err)
+}
+
+func installIgnition(opts configurator.Options) {
+	client := downloader.New(opts.GetConnectorDirectory())
+	ignitionFile, err := client.Download(opts.GetIgnitionURI())
+	fatalIfError(opts, "error downloading ignition", err)
 
 	err = os.Rename(ignitionFile, opts.GetExecutablePath())
-	fatalIfError("error moving ignition", err)
+	fatalIfError(opts, "error moving ignition", err)
 
 	err = os.Chmod(opts.GetExecutablePath(), os.FileMode(int(0777)))
-	fatalIfError("error making exectuable", err)
+	fatalIfError(opts, "error making exectuable", err)
+}
 
+func foreverize(opts configurator.Options) {
 	foreverizerClient := foreverizer.New(opts)
-	err = foreverizerClient.Do()
-	fatalIfError("error setuping device to run forever", err)
-
-	fmt.Println("done installing")
-	windowsMustWait()
+	err := foreverizerClient.Do()
+	fatalIfError(opts, "error setuping device to run forever", err)
 }
 
 func getOpts(context *cli.Context) configurator.Options {
 	opts := configurator.NewOptionsFromContext(context)
 
-	if opts.GetConnector() == "" ||
-		opts.GetGithubSlug() == "" ||
-		opts.GetTag() == "" ||
-		opts.GetUUID() == "" ||
-		opts.GetToken() == "" {
+	errStr := opts.Validate()
 
+	if errStr != "" {
 		cli.ShowAppHelp(context)
-
-		if opts.GetConnector() == "" {
-			color.Red("  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR")
-		}
-
-		if opts.GetGithubSlug() == "" {
-			color.Red("  Missing required flag --github-slug, g or MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG")
-		}
-
-		if opts.GetTag() == "" {
-			color.Red("  Missing required flag --tag or MESHBLU_CONNECTOR_ASSEMBLER_TAG")
-		}
-
-		if opts.GetUUID() == "" {
-			color.Red("  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_ASSEMBLER_UUID")
-		}
-
-		if opts.GetToken() == "" {
-			color.Red("  Missing required flag --token or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN")
-		}
+		color.Red(errStr)
 		os.Exit(1)
 	}
 
 	return opts
 }
 
-func fatalIfError(msg string, err error) {
+func fatalIfError(opts configurator.Options, msg string, err error) {
 	if err == nil {
 		return
 	}
 
 	log.Println(msg, err.Error())
-	windowsMustWait()
+	windowsMustWait(opts)
 	log.Fatalln("Exiting...")
 }
 
-func windowsMustWait() {
+func windowsMustWait(opts configurator.Options) {
+	if opts.GetDebug() == false {
+		return
+	}
 	if runtime.GOOS == "windows" {
 		fmt.Println("Press any key to continue >>>")
 		bufio.NewReader(os.Stdin).ReadBytes('\n')

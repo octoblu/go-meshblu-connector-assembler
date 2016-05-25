@@ -21,10 +21,12 @@ type OptionsConfig struct {
 	Hostname        string
 	Port            int
 	UUID, Token     string
+	Debug           bool
 }
 
 // Options defines the service configurations
 type Options interface {
+	Validate() string
 	GetIgnitionURI() string
 	GetConnectorDirectory() string
 	GetBinDirectory() string
@@ -44,10 +46,12 @@ type Options interface {
 	GetPort() int
 	GetUUID() string
 	GetToken() string
+	GetDebug() bool
 }
 
 // NewOptionsFromContext should create an options interface from the context
 func NewOptionsFromContext(context *cli.Context) Options {
+	debug := context.Bool("debug")
 	outputDirectory := context.String("output")
 	if outputDirectory == "" {
 		outputDirectory = GetDefaultServiceDirectory()
@@ -57,9 +61,6 @@ func NewOptionsFromContext(context *cli.Context) Options {
 		log.Fatalln("Invalid output directory:", err.Error())
 	}
 	ignitionTag := context.String("ignition")
-	if ignitionTag == "" {
-		ignitionTag = "v4.1.2"
-	}
 	return &OptionsConfig{
 		IgnitionTag:     ignitionTag,
 		Connector:       context.String("connector"),
@@ -71,6 +72,7 @@ func NewOptionsFromContext(context *cli.Context) Options {
 		Port:            443,
 		UUID:            context.String("uuid"),
 		Token:           context.String("token"),
+		Debug:           debug,
 	}
 }
 
@@ -91,6 +93,29 @@ func NewOptions(optConfig *OptionsConfig) Options {
 	optConfig.IgnitionTag = ignitionTag
 	optConfig.OutputDirectory = outputDirectory
 	return optConfig
+}
+
+// Validate returns an error string or an empty string if valid
+func (opts *OptionsConfig) Validate() string {
+	if opts.GetConnector() == "" {
+		return "  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR"
+	}
+	if opts.GetGithubSlug() == "" {
+		return "  Missing required flag --github-slug, -g or MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG"
+	}
+	if opts.GetTag() == "" {
+		return "  Missing required flag --tag, -T or MESHBLU_CONNECTOR_ASSEMBLER_TAG"
+	}
+	if opts.GetUUID() == "" {
+		return "  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_ASSEMBLER_UUID"
+	}
+	if opts.GetToken() == "" {
+		return "  Missing required flag --token, -t or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN"
+	}
+	if opts.IgnitionTag == "" {
+		return "  Missing required flag --ignition, -i or MESHBLU_CONNECTOR_ASSEMBLER_IGNITION_TAG"
+	}
+	return ""
 }
 
 // GetIgnitionURI gets the OS specific connector path
@@ -179,4 +204,9 @@ func (opts *OptionsConfig) GetUUID() string {
 // GetToken get meshblu token
 func (opts *OptionsConfig) GetToken() string {
 	return opts.Token
+}
+
+// GetDebug gets the debug flag
+func (opts *OptionsConfig) GetDebug() bool {
+	return opts.Debug
 }

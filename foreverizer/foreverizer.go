@@ -1,12 +1,14 @@
 package foreverizer
 
 import (
-	"fmt"
 	"runtime"
 
 	"github.com/kardianos/service"
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
+	De "github.com/tj/go-debug"
 )
+
+var debug = De.Debug("meshblu-connector-assembler:foreverizer")
 
 // Foreverizer interfaces the long running services on the os
 type Foreverizer interface {
@@ -27,7 +29,7 @@ func New(opts configurator.Options) Foreverizer {
 
 // Do will run the setup
 func (client *Client) Do() error {
-	fmt.Println("foreverizing...")
+	debug("foreverizing...")
 	opts := client.opts
 	userService := true
 	if runtime.GOOS == "linux" {
@@ -51,15 +53,15 @@ func (client *Client) Do() error {
 		return err
 	}
 
-	fmt.Println("maybe stop and removing service...")
+	debug("maybe stop and removing service...")
 	s.Uninstall()
 
-	fmt.Println("installing service...")
+	debug("installing service...")
 	err = s.Install()
 	if err != nil {
 		return err
 	}
-	fmt.Println("starting...")
+	debug("starting...")
 	err = s.Start()
 	if err != nil {
 		return err

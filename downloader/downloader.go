@@ -7,11 +7,16 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	De "github.com/tj/go-debug"
 )
+
+var debug = De.Debug("meshblu-connector-assembler:downloader")
 
 // Downloader interface with a way of downloading connector bundles
 type Downloader interface {
 	Download(downloadURI string) (string, error)
+	GetBody(downloadURI string) (io.ReadCloser, error)
 }
 
 // Client interfaces with remote cdn
@@ -26,42 +31,51 @@ func New(OutputDirectory string) Downloader {
 
 // Download downloads the connector the local directory
 func (client *Client) Download(downloadURI string) (string, error) {
-	fmt.Println("downloading connector: ", downloadURI)
+	debug("downloading: %v", downloadURI)
 
 	downloadFile := client.getDownloadFile(downloadURI)
-	fmt.Println("to: ", downloadFile)
+	debug("to: %v", downloadFile)
 	outputStream, err := os.Create(downloadFile)
 
 	if err != nil {
-		fmt.Println("error opening file to write to: ", err.Error())
-		return "", err
+		return "", fmt.Errorf("error opening output stream: %v", err.Error())
 	}
 
 	defer outputStream.Close()
 
+	body, err := client.GetBody(downloadURI)
+	if err != nil {
+		return "", err
+	}
+	defer body.Close()
+
+	_, err = io.Copy(outputStream, body)
+
+	if err != nil {
+		return "", fmt.Errorf("error downloading to file %v", err.Error())
+	}
+
+	debug("downloaded!")
+
+	return downloadFile, nil
+}
+
+// GetBody gets the res.Body from download uri
+func (client *Client) GetBody(downloadURI string) (io.ReadCloser, error) {
+	debug("downloading: %v", downloadURI)
 	response, err := http.Get(downloadURI)
 
 	if err != nil {
-		fmt.Println("http error downloading: ", err.Error())
-		return "", err
+		return nil, fmt.Errorf("http error downloading: %v", err.Error())
 	}
-
-	defer response.Body.Close()
 
 	if response.StatusCode != 200 {
-		return "", fmt.Errorf("download returned invalid response code: %v", response.StatusCode)
+		return nil, fmt.Errorf("download returned invalid response code: %v", response.StatusCode)
 	}
 
-	_, err = io.Copy(outputStream, response.Body)
+	debug("successful retrieved body")
 
-	if err != nil {
-		fmt.Println("error downloading to file", err.Error())
-		return "", err
-	}
-
-	fmt.Println("downloaded!")
-
-	return downloadFile, nil
+	return response.Body, nil
 }
 
 func (client *Client) getDownloadFile(downloadURI string) string {

@@ -18,6 +18,14 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/c4milo/unzipit",
+			"repository": "https://github.com/c4milo/unzipit",
+			"vcs": "git",
+			"revision": "339618fad77ac6102721ba322bc1b1d678083520",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/codegangsta/cli",
 			"repository": "https://github.com/codegangsta/cli",
 			"vcs": "git",
