@@ -86,7 +86,7 @@ func run(context *cli.Context) {
 }
 
 func writeConfiguration(opts configurator.Options) {
-	debug("writing conifuration files")
+	debug("writing configuration files")
 	configuratorClient := configurator.New(opts)
 	err := configuratorClient.WriteConfigs()
 	fatalIfError(opts, "error writing configs:", err)
