@@ -240,7 +240,6 @@ func unpackZip(zr *zip.Reader, destPath string) (string, error) {
 
 func unzipFile(f *zip.File, destPath string) error {
 	pathSeparator := string(os.PathSeparator)
-
 	rc, err := f.Open()
 	if err != nil {
 		return err
@@ -252,10 +251,16 @@ func unzipFile(f *zip.File, destPath string) error {
 	}()
 
 	filePath := sanitize(f.Name)
-	sepInd := strings.LastIndex(filePath, pathSeparator)
 
 	// If the file is a subdirectory, it creates it before attempting to
 	// create the actual file
+	if f.FileInfo().IsDir() {
+		if err := os.MkdirAll(filepath.Join(destPath, filePath), f.Mode()); err != nil {
+			return err
+		}
+		return nil
+	}
+	sepInd := strings.LastIndex(filePath, pathSeparator)
 	if sepInd > -1 {
 		directory := filePath[0:sepInd]
 		if err := os.MkdirAll(filepath.Join(destPath, directory), 0740); err != nil {

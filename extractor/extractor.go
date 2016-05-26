@@ -4,8 +4,8 @@ import (
 	"io"
 	"os"
 
-	"github.com/c4milo/unzipit"
 	"github.com/octoblu/go-meshblu-connector-assembler/downloader"
+	"github.com/octoblu/unzipit"
 	De "github.com/tj/go-debug"
 )
 

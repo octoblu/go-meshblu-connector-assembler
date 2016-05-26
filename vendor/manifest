@@ -18,14 +18,6 @@
 			"notests": true
 		},
 		{
-			"importpath": "github.com/c4milo/unzipit",
-			"repository": "https://github.com/c4milo/unzipit",
-			"vcs": "git",
-			"revision": "339618fad77ac6102721ba322bc1b1d678083520",
-			"branch": "master",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/codegangsta/cli",
 			"repository": "https://github.com/codegangsta/cli",
 			"vcs": "git",
@@ -87,6 +79,14 @@
 			"repository": "https://github.com/mattn/go-isatty",
 			"vcs": "git",
 			"revision": "56b76bdf51f7708750eac80fa38b952bb9f32639",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/octoblu/unzipit",
+			"repository": "https://github.com/octoblu/unzipit",
+			"vcs": "git",
+			"revision": "da0d7368be9ace550e15ad554aaf69fc468ca4cb",
 			"branch": "master",
 			"notests": true
 		},
