@@ -45,11 +45,6 @@ func main() {
 			Usage:  "Tag or Version",
 		},
 		cli.StringFlag{
-			Name:   "legacy, l",
-			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_LEGACY",
-			Usage:  "Legacy Version",
-		},
-		cli.StringFlag{
 			Name:   "ignition, i",
 			EnvVar: "MESHBLU_CONNECTOR_ASSEMBLER_IGNITION_TAG",
 			Usage:  "Ignition Tag",

@@ -47,7 +47,6 @@ env DEBUG='meshblu-connector-assembler*' go-meshblu-connector-assembler
 * `--github-slug`, `-g` *String* The github owner and repo, separated by a slash. Example: `octoblu/meshblu-connector-say-hello`
 * `--tag`, `-T` *String* The release tag of the connector to download. Example `v1.0.0`.
 * `--ignition`, `-i` *String* The tag for the github release of [go-meshblu-connector-ignition](https://github.com/octoblu/go-meshblu-connector-ignition). Example: `v1.0.0`.
-* `--legacy`, `-l` *String* **(optional)** If specified, it will enable legacy and value will be the legacy version of the [run-legacy](https://github.com/octoblu/meshblu-connector-run-legacy) connector.
 * `--debug`, `-d` *Bool* **(optional)** If specified this will wait for user input when setting up the service files on windows.
 
 ## Example
@@ -60,31 +59,20 @@ go-meshblu-connector-assembler \
   --uuid 6f87a9bc-02e6-41a8-b265-a1a58b8e569a \
   --token 8b265a1a55696f87a9bc041a82e6b8ea \
   --github-slug octoblu/meshblu-connector-say-hello \
-  --tag v5.0.2 \
-  --ignition v4.1.10
-```
-
-Assemble a legacy connector
-
-```bash
-go-meshblu-connector-assembler \
-  --connector say-hello \
-  --uuid 6f87a9bc-02e6-41a8-b265-a1a58b8e569a \
-  --token 8b265a1a55696f87a9bc041a82e6b8ea \
-  --github-slug octoblu/meshblu-connector-run-legacy \
-  --tag v2.0.4 \
-  --ignition v4.1.10
+  --tag v6.0.0 \
+  --ignition v6.0.0
 ```
 
 Run with debug
 
 ```bash
-env DEBUG='meshblu-connector-assembler*' go-meshblu-connector-assembler \
+env DEBUG='meshblu-connector-assembler*' \
+  go-meshblu-connector-assembler \
   --connector say-hello \
   --uuid 6f87a9bc-02e6-41a8-b265-a1a58b8e569a \
   --token 8b265a1a55696f87a9bc041a82e6b8ea \
-  --github-slug octoblu/meshblu-connector-run-legacy \
-  --tag v2.0.4 \
-  --ignition v4.1.10 \
+  --github-slug octoblu/meshblu-connector-say-hello \
+  --tag v6.0.0 \
+  --ignition v6.0.0 \
   --debug
 ```

@@ -14,8 +14,6 @@ type ServiceConfig struct {
 	GithubSlug    string
 	Tag           string
 	BinPath       string
-	Legacy        bool
-	LegacyTag     string
 	Dir           string
 
 	Stderr, Stdout string
@@ -31,8 +29,6 @@ func NewServiceConfig(opts Options) *ServiceConfig {
 		GithubSlug:    opts.GetGithubSlug(),
 		Tag:           opts.GetTag(),
 		BinPath:       opts.GetBinDirectory(),
-		Legacy:        opts.GetLegacy() != "",
-		LegacyTag:     opts.GetLegacy(),
 		Dir:           opts.GetConnectorDirectory(),
 		Stderr:        filepath.Join(opts.GetLogDirectory(), "connector-error.log"),
 		Stdout:        filepath.Join(opts.GetLogDirectory(), "connector.log"),
