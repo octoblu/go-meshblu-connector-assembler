@@ -27,3 +27,5 @@ entrypoint/meshblu-connector-assembler
 meshblu-connector-assembler-go
 go-meshblu-connector-assembler
 tmp
+dist
+deploy

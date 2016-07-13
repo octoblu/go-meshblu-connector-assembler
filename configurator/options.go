@@ -27,6 +27,7 @@ type OptionsConfig struct {
 type Options interface {
 	Validate() string
 	GetIgnitionURI() string
+	GetIgnitionTag() string
 	GetConnectorDirectory() string
 	GetBinDirectory() string
 	GetLogDirectory() string
@@ -85,7 +86,7 @@ func NewOptions(optConfig *OptionsConfig) Options {
 	}
 	ignitionTag := optConfig.IgnitionTag
 	if ignitionTag == "" {
-		ignitionTag = "v4.1.0"
+		ignitionTag = "v6.1.0"
 	}
 	optConfig.IgnitionTag = ignitionTag
 	optConfig.OutputDirectory = outputDirectory
@@ -134,6 +135,11 @@ func (opts *OptionsConfig) GetLogDirectory() string {
 // GetConnector get connector name
 func (opts *OptionsConfig) GetConnector() string {
 	return opts.Connector
+}
+
+// GetIgnitionTag gets the ignition tag
+func (opts *OptionsConfig) GetIgnitionTag() string {
+	return opts.IgnitionTag
 }
 
 // GetGithubSlug get connector name

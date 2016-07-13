@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"strconv"
+	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
@@ -87,7 +89,26 @@ func writeConfiguration(opts configurator.Options) {
 	fatalIfError(opts, "error writing configs:", err)
 }
 
+func shouldDownloadConnector(opts configurator.Options) bool {
+	tag := strings.Replace(opts.GetIgnitionTag(), "v", "", 1)
+	parts := strings.Split(tag, ".")
+	major, _ := strconv.ParseInt(parts[0], 10, 0)
+	minor, _ := strconv.ParseInt(parts[1], 10, 0)
+	if major < 6 {
+		return true
+	}
+	if major == 6 && minor < 1 {
+		return true
+	}
+	return false
+}
+
 func downloadConnector(opts configurator.Options) {
+	downloadIt := shouldDownloadConnector(opts)
+	if !downloadIt {
+		debug("skipping downloading the connector because the ignition script will do it")
+		return
+	}
 	debug("downloading the connector")
 	client := extractor.New()
 	err := client.DoWithURI(opts.GetDownloadURI(), opts.GetConnectorDirectory())
