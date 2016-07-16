@@ -12,21 +12,21 @@ func GetDefaultServiceDirectory() string {
 }
 
 // GetBinDirectory gets the OS specific log directory
-func (opts *OptionsConfig) GetBinDirectory() string {
+func (opts *options) GetBinDirectory() string {
 	return filepath.Join(opts.GetOutputDirectory(), "bin")
 }
 
 // GetExecutablePath gets the OS specific service path
-func (opts *OptionsConfig) GetExecutablePath() string {
+func (opts *options) GetExecutablePath() string {
 	return filepath.Join(opts.GetConnectorDirectory(), "start")
 }
 
 // GetServiceName gets the OS specific log directory
-func (opts *OptionsConfig) GetServiceName() string {
+func (opts *options) GetServiceName() string {
 	return fmt.Sprintf("MeshbluConnector-%s", opts.UUID)
 }
 
 // GetUserName get service display name
-func (opts *OptionsConfig) GetUserName() (string, error) {
+func (opts *options) GetUserName() (string, error) {
 	return "", nil
 }

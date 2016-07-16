@@ -2,15 +2,14 @@ package configurator
 
 import (
 	"fmt"
-	"log"
 	"path/filepath"
 	"runtime"
 
 	"github.com/codegangsta/cli"
 )
 
-// OptionsConfig defines the service configurations
-type OptionsConfig struct {
+// OptionsOptions defines the service configurations
+type OptionsOptions struct {
 	IgnitionTag     string
 	Connector       string
 	GithubSlug      string
@@ -25,7 +24,6 @@ type OptionsConfig struct {
 
 // Options defines the service configurations
 type Options interface {
-	Validate() string
 	GetIgnitionURI() string
 	GetIgnitionTag() string
 	GetConnectorDirectory() string
@@ -48,125 +46,139 @@ type Options interface {
 	GetDebug() bool
 }
 
+type options struct {
+	ignitionTag     string
+	connector       string
+	githubSlug      string
+	tag             string
+	outputDirectory string
+	serviceName     string
+	hostname        string
+	port            int
+	uuid, token     string
+	debug           bool
+}
+
 // NewOptionsFromContext should create an options interface from the context
-func NewOptionsFromContext(context *cli.Context) Options {
-	debug := context.Bool("debug")
-	outputDirectory := context.String("output")
-	if outputDirectory == "" {
-		outputDirectory = GetDefaultServiceDirectory()
-	}
-	outputDirectory, err := filepath.Abs(outputDirectory)
-	if err != nil {
-		log.Fatalln("Invalid output directory:", err.Error())
-	}
-	ignitionTag := context.String("ignition")
-	return &OptionsConfig{
-		IgnitionTag:     ignitionTag,
+func NewOptionsFromContext(context *cli.Context) (Options, error) {
+	return NewOptions(OptionsOptions{
+		IgnitionTag:     context.String("ignition"),
 		Connector:       context.String("connector"),
 		GithubSlug:      context.String("github-slug"),
 		Tag:             context.String("tag"),
-		OutputDirectory: outputDirectory,
-		Hostname:        "meshblu.octoblu.com",
-		Port:            443,
+		OutputDirectory: context.String("output"),
 		UUID:            context.String("uuid"),
 		Token:           context.String("token"),
-		Debug:           debug,
-	}
+		Debug:           context.Bool("debug"),
+	})
 }
 
 // NewOptions should create an options interface
-func NewOptions(optConfig *OptionsConfig) Options {
-	outputDirectory := optConfig.OutputDirectory
+func NewOptions(opts OptionsOptions) (Options, error) {
+	if opts.Connector == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.Connector")
+	}
+	if opts.GithubSlug == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.GithubSlug")
+	}
+	if opts.Tag == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.Tag")
+	}
+	if opts.UUID == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.UUID")
+	}
+	if opts.Token == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.Token")
+	}
+	if opts.IgnitionTag == "" {
+		return nil, fmt.Errorf("Missing required opt: opts.IgnitionTag")
+	}
+
+	hostname := opts.Hostname
+	if hostname == "" {
+		hostname = "meshblu.octoblu.com"
+	}
+
+	port := opts.Port
+	if port == 0 {
+		port = 443
+	}
+
+	outputDirectory := opts.OutputDirectory
 	if outputDirectory == "" {
 		outputDirectory = GetDefaultServiceDirectory()
 	}
+
 	outputDirectory, err := filepath.Abs(outputDirectory)
 	if err != nil {
-		log.Fatalln("Invalid output directory:", err.Error())
+		return nil, err
 	}
-	ignitionTag := optConfig.IgnitionTag
-	if ignitionTag == "" {
-		ignitionTag = "v6.1.0"
-	}
-	optConfig.IgnitionTag = ignitionTag
-	optConfig.OutputDirectory = outputDirectory
-	return optConfig
-}
 
-// Validate returns an error string or an empty string if valid
-func (opts *OptionsConfig) Validate() string {
-	if opts.GetConnector() == "" {
-		return "  Missing required flag --connector, c or MESHBLU_CONNECTOR_ASSEMBLER_CONNECTOR"
-	}
-	if opts.GetGithubSlug() == "" {
-		return "  Missing required flag --github-slug, -g or MESHBLU_CONNECTOR_ASSEMBLER_GITHUB_SLUG"
-	}
-	if opts.GetTag() == "" {
-		return "  Missing required flag --tag, -T or MESHBLU_CONNECTOR_ASSEMBLER_TAG"
-	}
-	if opts.GetUUID() == "" {
-		return "  Missing required flag --uuid, -u or MESHBLU_CONNECTOR_ASSEMBLER_UUID"
-	}
-	if opts.GetToken() == "" {
-		return "  Missing required flag --token, -t or MESHBLU_CONNECTOR_ASSEMBLER_TOKEN"
-	}
-	if opts.IgnitionTag == "" {
-		return "  Missing required flag --ignition, -i or MESHBLU_CONNECTOR_ASSEMBLER_IGNITION_TAG"
-	}
-	return ""
+	return &options{
+		hostname:        hostname,
+		port:            port,
+		outputDirectory: outputDirectory,
+		connector:       opts.Connector,
+		ignitionTag:     opts.IgnitionTag,
+		githubSlug:      opts.GithubSlug,
+		tag:             opts.Tag,
+		uuid:            opts.UUID,
+		token:           opts.Token,
+		debug:           opts.Debug,
+	}, nil
 }
 
 // GetIgnitionURI gets the OS specific connector path
-func (opts *OptionsConfig) GetIgnitionURI() string {
+func (opts *options) GetIgnitionURI() string {
 	baseURI := "https://github.com/octoblu/go-meshblu-connector-ignition/releases/download"
-	return fmt.Sprintf("%s/%s/meshblu-connector-ignition-%s-%s", baseURI, opts.IgnitionTag, runtime.GOOS, runtime.GOARCH)
+	return fmt.Sprintf("%s/%s/meshblu-connector-ignition-%s-%s", baseURI, opts.ignitionTag, runtime.GOOS, runtime.GOARCH)
 }
 
 // GetConnectorDirectory gets the OS specific connector path
-func (opts *OptionsConfig) GetConnectorDirectory() string {
-	return filepath.Join(opts.OutputDirectory, opts.UUID)
+func (opts *options) GetConnectorDirectory() string {
+	return filepath.Join(opts.outputDirectory, opts.uuid)
 }
 
 // GetLogDirectory gets the OS specific log directory
-func (opts *OptionsConfig) GetLogDirectory() string {
+func (opts *options) GetLogDirectory() string {
 	return filepath.Join(opts.GetConnectorDirectory(), "log")
 }
 
 // GetConnector get connector name
-func (opts *OptionsConfig) GetConnector() string {
-	return opts.Connector
+func (opts *options) GetConnector() string {
+	return opts.connector
 }
 
 // GetIgnitionTag gets the ignition tag
-func (opts *OptionsConfig) GetIgnitionTag() string {
-	return opts.IgnitionTag
+func (opts *options) GetIgnitionTag() string {
+	return opts.ignitionTag
 }
 
 // GetGithubSlug get connector name
-func (opts *OptionsConfig) GetGithubSlug() string {
-	return opts.GithubSlug
+func (opts *options) GetGithubSlug() string {
+	return opts.githubSlug
 }
 
 // GetTag get connector name
-func (opts *OptionsConfig) GetTag() string {
-	return opts.Tag
+func (opts *options) GetTag() string {
+	return opts.tag
 }
 
 // GetDisplayName get service display name
-func (opts *OptionsConfig) GetDisplayName() string {
+func (opts *options) GetDisplayName() string {
 	return fmt.Sprintf("MeshbluConnector %s", opts.GetUUID())
 }
 
 // GetDescription get service description
-func (opts *OptionsConfig) GetDescription() string {
+func (opts *options) GetDescription() string {
 	return fmt.Sprintf("MeshbluConnector (%s) %s", opts.GetConnector(), opts.GetUUID())
 }
 
 // GetDownloadURI get download uri
-func (opts *OptionsConfig) GetDownloadURI() string {
+func (opts *options) GetDownloadURI() string {
 	tag := opts.GetTag()
 	connector := opts.GetConnector()
-	baseURI := fmt.Sprintf("https://github.com/%s/releases/download", opts.GithubSlug)
+	baseURI := fmt.Sprintf("https://github.com/%s/releases/download", opts.githubSlug)
 	ext := "tar.gz"
 	if runtime.GOOS == "windows" {
 		ext = "zip"
@@ -176,31 +188,31 @@ func (opts *OptionsConfig) GetDownloadURI() string {
 }
 
 // GetOutputDirectory get output directory
-func (opts *OptionsConfig) GetOutputDirectory() string {
-	return opts.OutputDirectory
+func (opts *options) GetOutputDirectory() string {
+	return opts.outputDirectory
 }
 
 // GetHostname get meshblu hostname
-func (opts *OptionsConfig) GetHostname() string {
-	return opts.Hostname
+func (opts *options) GetHostname() string {
+	return opts.hostname
 }
 
 // GetPort get meshblu port
-func (opts *OptionsConfig) GetPort() int {
-	return opts.Port
+func (opts *options) GetPort() int {
+	return opts.port
 }
 
 // GetUUID get meshblu uuid
-func (opts *OptionsConfig) GetUUID() string {
-	return opts.UUID
+func (opts *options) GetUUID() string {
+	return opts.uuid
 }
 
 // GetToken get meshblu token
-func (opts *OptionsConfig) GetToken() string {
-	return opts.Token
+func (opts *options) GetToken() string {
+	return opts.token
 }
 
 // GetDebug gets the debug flag
-func (opts *OptionsConfig) GetDebug() bool {
-	return opts.Debug
+func (opts *options) GetDebug() bool {
+	return opts.debug
 }

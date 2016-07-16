@@ -11,7 +11,6 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
-	"github.com/fatih/color"
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 	"github.com/octoblu/go-meshblu-connector-assembler/downloader"
 	"github.com/octoblu/go-meshblu-connector-assembler/extractor"
@@ -79,14 +78,16 @@ func run(context *cli.Context) {
 	foreverize(opts)
 
 	debug("done installing")
-	windowsMustWait(opts)
+	if opts.GetDebug() {
+		tellWindowsToWait()
+	}
 }
 
 func writeConfiguration(opts configurator.Options) {
 	debug("writing configuration files")
 	configuratorClient := configurator.New(opts)
 	err := configuratorClient.WriteConfigs()
-	fatalIfError(opts, "error writing configs:", err)
+	fatalIfError(opts.GetDebug(), "error writing configs:", err)
 }
 
 func shouldDownloadConnector(opts configurator.Options) bool {
@@ -112,73 +113,66 @@ func downloadConnector(opts configurator.Options) {
 	debug("downloading the connector")
 	client := extractor.New()
 	err := client.DoWithURI(opts.GetDownloadURI(), opts.GetConnectorDirectory())
-	fatalIfError(opts, "error downloading:", err)
+	fatalIfError(opts.GetDebug(), "error downloading:", err)
 }
 
 func createDirectories(opts configurator.Options) {
 	debug("creating directories")
 	err := os.MkdirAll(opts.GetOutputDirectory(), 0755)
-	fatalIfError(opts, "create output directory", err)
+	fatalIfError(opts.GetDebug(), "create output directory", err)
 
 	debug("creating log directory")
 	err = os.MkdirAll(opts.GetLogDirectory(), 0755)
-	fatalIfError(opts, "create log directory", err)
+	fatalIfError(opts.GetDebug(), "create log directory", err)
 
 	debug("creating bin directory")
 	err = os.MkdirAll(opts.GetBinDirectory(), 0755)
-	fatalIfError(opts, "create bin directory", err)
+	fatalIfError(opts.GetDebug(), "create bin directory", err)
 }
 
 func installIgnition(opts configurator.Options) {
 	client := downloader.New(opts.GetConnectorDirectory())
 	ignitionFile, err := client.Download(opts.GetIgnitionURI())
-	fatalIfError(opts, "error downloading ignition", err)
+	fatalIfError(opts.GetDebug(), "error downloading ignition", err)
 
 	err = os.Rename(ignitionFile, opts.GetExecutablePath())
-	fatalIfError(opts, "error moving ignition", err)
+	fatalIfError(opts.GetDebug(), "error moving ignition", err)
 
 	err = os.Chmod(opts.GetExecutablePath(), os.FileMode(int(0777)))
-	fatalIfError(opts, "error making exectuable", err)
+	fatalIfError(opts.GetDebug(), "error making exectuable", err)
 }
 
 func foreverize(opts configurator.Options) {
 	foreverizerClient := foreverizer.New(opts)
 	err := foreverizerClient.Do()
-	fatalIfError(opts, "error setuping device to run forever", err)
+	fatalIfError(opts.GetDebug(), "error setuping device to run forever", err)
 }
 
 func getOpts(context *cli.Context) configurator.Options {
-	opts := configurator.NewOptionsFromContext(context)
-
-	errStr := opts.Validate()
-
-	if errStr != "" {
-		cli.ShowAppHelp(context)
-		color.Red(errStr)
-		os.Exit(1)
-	}
-
+	opts, err := configurator.NewOptionsFromContext(context)
+	fatalIfError(true, "Failed to create configurationion", err)
 	return opts
 }
 
-func fatalIfError(opts configurator.Options, msg string, err error) {
+func fatalIfError(windowsShouldWait bool, msg string, err error) {
 	if err == nil {
 		return
 	}
 
 	log.Println(msg, err.Error())
-	windowsMustWait(opts)
+	if windowsShouldWait {
+		tellWindowsToWait()
+	}
 	log.Fatalln("Exiting...")
 }
 
-func windowsMustWait(opts configurator.Options) {
-	if opts.GetDebug() == false {
+func tellWindowsToWait() {
+	if runtime.GOOS != "windows" {
 		return
 	}
-	if runtime.GOOS == "windows" {
-		fmt.Println("Press any key to continue >>>")
-		bufio.NewReader(os.Stdin).ReadBytes('\n')
-	}
+
+	fmt.Println("Press any key to continue >>>")
+	bufio.NewReader(os.Stdin).ReadBytes('\n')
 }
 
 func version() string {

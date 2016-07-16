@@ -19,6 +19,12 @@ type ServiceConfig struct {
 	Stderr, Stdout string
 }
 
+/*
+{
+  "ServiceName": "blink1",Blink(1)",
+}
+*/
+
 // NewServiceConfig constructs a new Meshblu instance
 func NewServiceConfig(opts Options) *ServiceConfig {
 	return &ServiceConfig{
