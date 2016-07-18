@@ -12,10 +12,10 @@ var debug = De.Debug("meshblu-connector-assembler:foreverizer")
 // Options device the options to be passed
 // to construct a new Foreverizer
 type Options struct {
-	ServiceName    string
-	DisplayName    string
-	Description    string
-	ExecutablePath string
+	ServiceName  string
+	DisplayName  string
+	Description  string
+	IgnitionPath string
 }
 
 // Foreverize registers the service with the OS
@@ -29,7 +29,7 @@ func Foreverize(opts Options) error {
 		Name:        opts.ServiceName,
 		DisplayName: opts.DisplayName,
 		Description: opts.Description,
-		Executable:  opts.ExecutablePath,
+		Executable:  opts.IgnitionPath,
 		Option: service.KeyValue{
 			"UserService": userService,
 			"KeepAlive":   true,

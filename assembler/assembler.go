@@ -1,9 +1,8 @@
-package doitaller
+package assembler
 
 import (
 	"os"
 
-	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 	"github.com/octoblu/go-meshblu-connector-assembler/foreverizer"
 	"github.com/octoblu/go-meshblu-connector-assembler/ignition"
 	"github.com/octoblu/go-meshblu-connector-assembler/meshbluconfig"
@@ -13,14 +12,14 @@ import De "github.com/tj/go-debug"
 
 var debug = De.Debug("meshblu-connector-assembler:doitaller")
 
-// DoItAll does all the things a connector assembler does
+// Assemble does all the things a connector assembler does
 // including:
 // [x]  creating directories
 // [x]  writing the meshblu config
 // [x]  writing the service config
 // [x]  installing the ignition
 // [x]  foreverize
-func DoItAll(opts configurator.Options) error {
+func Assemble(opts Options) error {
 	var err error
 
 	err = createDirectories(opts)
@@ -51,12 +50,12 @@ func DoItAll(opts configurator.Options) error {
 	return nil
 }
 
-func createDirectories(opts configurator.Options) error {
+func createDirectories(opts Options) error {
 	var err error
 
-	outputDir := opts.GetOutputDirectory()
-	logDir := opts.GetLogDirectory()
-	binDir := opts.GetBinDirectory()
+	outputDir := opts.OutputDirectory
+	logDir := opts.LogDirectory
+	binDir := opts.BinDirectory
 
 	debug("creating directories")
 	err = os.MkdirAll(outputDir, 0755)
@@ -79,42 +78,42 @@ func createDirectories(opts configurator.Options) error {
 	return nil
 }
 
-func foreverize(opts configurator.Options) error {
+func foreverize(opts Options) error {
 	return foreverizer.Foreverize(foreverizer.Options{
-		ServiceName:    opts.GetServiceName(),
-		DisplayName:    opts.GetDisplayName(),
-		Description:    opts.GetDescription(),
-		ExecutablePath: opts.GetExecutablePath(),
+		ServiceName:  opts.ServiceName,
+		DisplayName:  opts.DisplayName,
+		Description:  opts.Description,
+		IgnitionPath: opts.IgnitionPath,
 	})
 }
 
-func installIgnition(opts configurator.Options) error {
+func installIgnition(opts Options) error {
 	return ignition.Install(ignition.InstallOptions{
-		IgnitionURL:  opts.GetIgnitionURI(),
-		IgnitionPath: opts.GetExecutablePath(),
+		IgnitionURL:  opts.IgnitionURL,
+		IgnitionPath: opts.IgnitionPath,
 	})
 }
 
-func writeMeshbluConfig(opts configurator.Options) error {
+func writeMeshbluConfig(opts Options) error {
 	return meshbluconfig.Write(meshbluconfig.Options{
-		DirPath:  opts.GetConnectorDirectory(),
-		UUID:     opts.GetUUID(),
-		Token:    opts.GetToken(),
-		Hostname: opts.GetHostname(),
-		Port:     opts.GetPort(),
+		DirPath:  opts.ConnectorDirectory,
+		UUID:     opts.UUID,
+		Token:    opts.Token,
+		Hostname: opts.Hostname,
+		Port:     opts.Port,
 	})
 }
 
-func writeServiceConfig(opts configurator.Options) error {
+func writeServiceConfig(opts Options) error {
 	return serviceconfig.Write(serviceconfig.Options{
-		ServiceName:   opts.GetServiceName(),
-		DisplayName:   opts.GetDisplayName(),
-		Description:   opts.GetDescription(),
-		ConnectorName: opts.GetConnector(),
-		GithubSlug:    opts.GetGithubSlug(),
-		Tag:           opts.GetTag(),
-		BinPath:       opts.GetBinDirectory(),
-		Dir:           opts.GetConnectorDirectory(),
-		LogDir:        opts.GetLogDirectory(),
+		ServiceName:   opts.ServiceName,
+		DisplayName:   opts.DisplayName,
+		Description:   opts.Description,
+		ConnectorName: opts.ConnectorName,
+		GithubSlug:    opts.GithubSlug,
+		Tag:           opts.Tag,
+		BinPath:       opts.BinDirectory,
+		Dir:           opts.ConnectorDirectory,
+		LogDir:        opts.LogDirectory,
 	})
 }

@@ -6,15 +6,10 @@ import (
 	"log"
 	"os"
 	"runtime"
-	"strconv"
-	"strings"
 
 	"github.com/codegangsta/cli"
 	"github.com/coreos/go-semver/semver"
-	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
-	"github.com/octoblu/go-meshblu-connector-assembler/downloader"
-	"github.com/octoblu/go-meshblu-connector-assembler/extractor"
-	"github.com/octoblu/go-meshblu-connector-assembler/foreverizer"
+	"github.com/octoblu/go-meshblu-connector-assembler/assembler"
 	De "github.com/tj/go-debug"
 )
 
@@ -65,93 +60,14 @@ func main() {
 }
 
 func run(context *cli.Context) {
-	opts := getOpts(context)
-
-	createDirectories(opts)
-
-	downloadConnector(opts)
-
-	writeConfiguration(opts)
-
-	installIgnition(opts)
-
-	foreverize(opts)
+	assemblerOptions, debugEnabled := getOpts(context)
+	err := assembler.Assemble(*assemblerOptions)
+	fatalIfError(debugEnabled, "Error assembling", err)
 
 	debug("done installing")
-	if opts.GetDebug() {
+	if debugEnabled {
 		tellWindowsToWait()
 	}
-}
-
-func writeConfiguration(opts configurator.Options) {
-	debug("writing configuration files")
-	configuratorClient := configurator.New(opts)
-	err := configuratorClient.WriteConfigs()
-	fatalIfError(opts.GetDebug(), "error writing configs:", err)
-}
-
-func shouldDownloadConnector(opts configurator.Options) bool {
-	tag := strings.Replace(opts.GetIgnitionTag(), "v", "", 1)
-	parts := strings.Split(tag, ".")
-	major, _ := strconv.ParseInt(parts[0], 10, 0)
-	minor, _ := strconv.ParseInt(parts[1], 10, 0)
-	if major < 6 {
-		return true
-	}
-	if major == 6 && minor < 1 {
-		return true
-	}
-	return false
-}
-
-func downloadConnector(opts configurator.Options) {
-	downloadIt := shouldDownloadConnector(opts)
-	if !downloadIt {
-		debug("skipping downloading the connector because the ignition script will do it")
-		return
-	}
-	debug("downloading the connector")
-	client := extractor.New()
-	err := client.DoWithURI(opts.GetDownloadURI(), opts.GetConnectorDirectory())
-	fatalIfError(opts.GetDebug(), "error downloading:", err)
-}
-
-func createDirectories(opts configurator.Options) {
-	debug("creating directories")
-	err := os.MkdirAll(opts.GetOutputDirectory(), 0755)
-	fatalIfError(opts.GetDebug(), "create output directory", err)
-
-	debug("creating log directory")
-	err = os.MkdirAll(opts.GetLogDirectory(), 0755)
-	fatalIfError(opts.GetDebug(), "create log directory", err)
-
-	debug("creating bin directory")
-	err = os.MkdirAll(opts.GetBinDirectory(), 0755)
-	fatalIfError(opts.GetDebug(), "create bin directory", err)
-}
-
-func installIgnition(opts configurator.Options) {
-	client := downloader.New(opts.GetConnectorDirectory())
-	ignitionFile, err := client.Download(opts.GetIgnitionURI())
-	fatalIfError(opts.GetDebug(), "error downloading ignition", err)
-
-	err = os.Rename(ignitionFile, opts.GetExecutablePath())
-	fatalIfError(opts.GetDebug(), "error moving ignition", err)
-
-	err = os.Chmod(opts.GetExecutablePath(), os.FileMode(int(0777)))
-	fatalIfError(opts.GetDebug(), "error making exectuable", err)
-}
-
-func foreverize(opts configurator.Options) {
-	foreverizerClient := foreverizer.New(opts)
-	err := foreverizerClient.Do()
-	fatalIfError(opts.GetDebug(), "error setuping device to run forever", err)
-}
-
-func getOpts(context *cli.Context) configurator.Options {
-	opts, err := configurator.NewOptionsFromContext(context)
-	fatalIfError(true, "Failed to create configurationion", err)
-	return opts
 }
 
 func fatalIfError(windowsShouldWait bool, msg string, err error) {
@@ -164,6 +80,19 @@ func fatalIfError(windowsShouldWait bool, msg string, err error) {
 		tellWindowsToWait()
 	}
 	log.Fatalln("Exiting...")
+}
+
+func getOpts(context *cli.Context) (*assembler.Options, bool) {
+	assemblerOptions, err := assembler.NewOptions(assembler.OptionsOptions{
+		ConnectorName: context.String("connector"),
+		GithubSlug:    context.String("github-slug"),
+		Tag:           context.String("tag"),
+		UUID:          context.String("uuid"),
+		Token:         context.String("token"),
+		IgnitionTag:   context.String("ignition"),
+	})
+	fatalIfError(true, "Error populating default options", err)
+	return assemblerOptions, context.Bool("Debug")
 }
 
 func tellWindowsToWait() {
