@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
+	"github.com/octoblu/go-meshblu-connector-assembler/ignition"
 	"github.com/octoblu/go-meshblu-connector-assembler/meshbluconfig"
 	"github.com/octoblu/go-meshblu-connector-assembler/serviceconfig"
 )
@@ -13,11 +14,11 @@ var debug = De.Debug("meshblu-connector-assembler:doitaller")
 
 // DoItAll does all the things a connector assembler does
 // including:
-//   creating directories
-//   writing the meshblu config
-//   writing the service config
-//   installing the ignition
-//   foreverize
+// [x]  creating directories
+// [x]  writing the meshblu config
+// [x]  writing the service config
+// [x]  installing the ignition
+// [ ]  foreverize
 func DoItAll(opts configurator.Options) error {
 	var err error
 
@@ -35,11 +36,11 @@ func DoItAll(opts configurator.Options) error {
 	if err != nil {
 		return err
 	}
-	//
-	// err = installIgnition(opts)
-	// if err != nil {
-	// 	return err
-	// }
+
+	err = installIgnition(opts)
+	if err != nil {
+		return err
+	}
 	//
 	// err = foreverize(opts)
 	// if err != nil {
@@ -75,6 +76,13 @@ func createDirectories(opts configurator.Options) error {
 	}
 
 	return nil
+}
+
+func installIgnition(opts configurator.Options) error {
+	return ignition.Install(ignition.InstallOptions{
+		IgnitionURL:  opts.GetIgnitionURI(),
+		IgnitionPath: opts.GetExecutablePath(),
+	})
 }
 
 func writeMeshbluConfig(opts configurator.Options) error {
