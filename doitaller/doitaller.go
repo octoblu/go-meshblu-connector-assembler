@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
+	"github.com/octoblu/go-meshblu-connector-assembler/foreverizer"
 	"github.com/octoblu/go-meshblu-connector-assembler/ignition"
 	"github.com/octoblu/go-meshblu-connector-assembler/meshbluconfig"
 	"github.com/octoblu/go-meshblu-connector-assembler/serviceconfig"
@@ -18,7 +19,7 @@ var debug = De.Debug("meshblu-connector-assembler:doitaller")
 // [x]  writing the meshblu config
 // [x]  writing the service config
 // [x]  installing the ignition
-// [ ]  foreverize
+// [x]  foreverize
 func DoItAll(opts configurator.Options) error {
 	var err error
 
@@ -41,11 +42,11 @@ func DoItAll(opts configurator.Options) error {
 	if err != nil {
 		return err
 	}
-	//
-	// err = foreverize(opts)
-	// if err != nil {
-	// 	return err
-	// }
+
+	err = foreverize(opts)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -76,6 +77,15 @@ func createDirectories(opts configurator.Options) error {
 	}
 
 	return nil
+}
+
+func foreverize(opts configurator.Options) error {
+	return foreverizer.Foreverize(foreverizer.Options{
+		ServiceName:    opts.GetServiceName(),
+		DisplayName:    opts.GetDisplayName(),
+		Description:    opts.GetDescription(),
+		ExecutablePath: opts.GetExecutablePath(),
+	})
 }
 
 func installIgnition(opts configurator.Options) error {
