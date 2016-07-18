@@ -44,11 +44,7 @@ func (client *Client) WriteMeshbluConfig() error {
 	}
 
 	configFilePath := filepath.Join(client.opts.GetConnectorDirectory(), "meshblu.json")
-	writeErr := ioutil.WriteFile(configFilePath, configJSON, 0644)
-	if writeErr != nil {
-		return writeErr
-	}
-	return nil
+	return ioutil.WriteFile(configFilePath, configJSON, 0644)
 }
 
 // WriteServiceConfig writes the configuration for the service

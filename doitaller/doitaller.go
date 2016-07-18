@@ -5,6 +5,7 @@ import (
 
 	"github.com/octoblu/go-meshblu-connector-assembler/configurator"
 	"github.com/octoblu/go-meshblu-connector-assembler/meshbluconfig"
+	"github.com/octoblu/go-meshblu-connector-assembler/serviceconfig"
 )
 import De "github.com/tj/go-debug"
 
@@ -20,12 +21,17 @@ var debug = De.Debug("meshblu-connector-assembler:doitaller")
 func DoItAll(opts configurator.Options) error {
 	var err error
 
-	err = createDirectories(opts.GetOutputDirectory(), opts.GetLogDirectory(), opts.GetBinDirectory())
+	err = createDirectories(opts)
 	if err != nil {
 		return err
 	}
 
-	err = writeMeshbluConfig(opts.GetOutputDirectory(), opts.GetUUID(), opts.GetToken(), opts.GetHostname(), opts.GetPort())
+	err = writeMeshbluConfig(opts)
+	if err != nil {
+		return err
+	}
+
+	err = writeServiceConfig(opts)
 	if err != nil {
 		return err
 	}
@@ -43,8 +49,12 @@ func DoItAll(opts configurator.Options) error {
 	return nil
 }
 
-func createDirectories(outputDir, logDir, getBinDir string) error {
+func createDirectories(opts configurator.Options) error {
 	var err error
+
+	outputDir := opts.GetOutputDirectory()
+	logDir := opts.GetLogDirectory()
+	binDir := opts.GetBinDirectory()
 
 	debug("creating directories")
 	err = os.MkdirAll(outputDir, 0755)
@@ -59,7 +69,7 @@ func createDirectories(outputDir, logDir, getBinDir string) error {
 	}
 
 	debug("creating bin directory")
-	err = os.MkdirAll(getBinDir, 0755)
+	err = os.MkdirAll(binDir, 0755)
 	if err != nil {
 		return err
 	}
@@ -67,12 +77,26 @@ func createDirectories(outputDir, logDir, getBinDir string) error {
 	return nil
 }
 
-func writeMeshbluConfig(dirPath, uuid, token, hostname string, port int) error {
+func writeMeshbluConfig(opts configurator.Options) error {
 	return meshbluconfig.Write(meshbluconfig.Options{
-		DirPath:  dirPath,
-		UUID:     uuid,
-		Token:    token,
-		Hostname: hostname,
-		Port:     port,
+		DirPath:  opts.GetConnectorDirectory(),
+		UUID:     opts.GetUUID(),
+		Token:    opts.GetToken(),
+		Hostname: opts.GetHostname(),
+		Port:     opts.GetPort(),
+	})
+}
+
+func writeServiceConfig(opts configurator.Options) error {
+	return serviceconfig.Write(serviceconfig.Options{
+		ServiceName:   opts.GetServiceName(),
+		DisplayName:   opts.GetDisplayName(),
+		Description:   opts.GetDescription(),
+		ConnectorName: opts.GetConnector(),
+		GithubSlug:    opts.GetGithubSlug(),
+		Tag:           opts.GetTag(),
+		BinPath:       opts.GetBinDirectory(),
+		Dir:           opts.GetConnectorDirectory(),
+		LogDir:        opts.GetLogDirectory(),
 	})
 }

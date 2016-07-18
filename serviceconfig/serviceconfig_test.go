@@ -33,8 +33,7 @@ var _ = Describe("ServiceConfig", func() {
 					Tag:           "some-tag",
 					BinPath:       "/some/bin/path",
 					Dir:           "/path/to/connector/",
-					Stderr:        "/path/to/connector/logs/connector-error.log",
-					Stdout:        "/path/to/connector/logs/connector.log",
+					LogDir:        "/path/to/logs/",
 				}
 				serviceconfig.WriteWithFS(options, fs)
 			})
@@ -57,8 +56,8 @@ var _ = Describe("ServiceConfig", func() {
 				  "Tag": "some-tag",
 				  "BinPath": "/some/bin/path",
 				  "Dir": "/path/to/connector/",
-				  "Stderr": "/path/to/connector/logs/connector-error.log",
-				  "Stdout": "/path/to/connector/logs/connector.log"
+				  "Stderr": "/path/to/logs/connector-error.log",
+				  "Stdout": "/path/to/logs/connector.log"
 				}`))
 			})
 		})
