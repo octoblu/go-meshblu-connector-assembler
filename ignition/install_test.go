@@ -69,6 +69,13 @@ var _ = Describe("Installing", func() {
 				Expect(transaction.Request).NotTo(BeNil())
 			})
 
+			It("Should create a directory", func() {
+				exists, err := afero.Exists(Fs, "/local/path/to")
+
+				Expect(err).To(BeNil())
+				Expect(exists).To(BeTrue())
+			})
+
 			It("Should create a file", func() {
 				exists, err := afero.Exists(Fs, "/local/path/to/ignition")
 

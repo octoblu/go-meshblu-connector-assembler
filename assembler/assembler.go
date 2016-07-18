@@ -22,26 +22,31 @@ var debug = De.Debug("meshblu-connector-assembler:doitaller")
 func Assemble(opts Options) error {
 	var err error
 
+	debug("createDirectories")
 	err = createDirectories(opts)
 	if err != nil {
 		return err
 	}
 
+	debug("writeMeshbluConfig")
 	err = writeMeshbluConfig(opts)
 	if err != nil {
 		return err
 	}
 
+	debug("writeServiceConfig")
 	err = writeServiceConfig(opts)
 	if err != nil {
 		return err
 	}
 
+	debug("installIgnition")
 	err = installIgnition(opts)
 	if err != nil {
 		return err
 	}
 
+	debug("foreverize")
 	err = foreverize(opts)
 	if err != nil {
 		return err

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func getExecutablePath(connectorDirectory string) string {
+func getIgnitionPath(connectorDirectory string) string {
 	return filepath.Join(connectorDirectory, "start.exe")
 }
 

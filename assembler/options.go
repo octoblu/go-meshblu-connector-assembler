@@ -83,6 +83,7 @@ func NewOptions(opts OptionsOptions) (*Options, error) {
 		Hostname:           getHostname(opts.Hostname),
 		Port:               getPort(opts.Port),
 		IgnitionURL:        getIgnitionURI(opts.IgnitionTag, runtime.GOOS, runtime.GOARCH),
+		IgnitionPath:       getIgnitionPath(ConnectorDirectory),
 		LogDirectory:       getLogDirectory(ConnectorDirectory),
 		BinDirectory:       getBinDirectory(OutputDirectory),
 		DisplayName:        getDisplayName(opts.UUID),
