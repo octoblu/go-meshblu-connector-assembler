@@ -86,8 +86,10 @@ func NewOptions(opts OptionsOptions) (*Options, error) {
 		IgnitionPath:       getIgnitionPath(ConnectorDirectory),
 		LogDirectory:       getLogDirectory(ConnectorDirectory),
 		BinDirectory:       getBinDirectory(OutputDirectory),
-		DisplayName:        getDisplayName(opts.UUID),
-		Description:        getDescription(opts.ConnectorName, opts.UUID),
+
+		ServiceName: getServiceName(opts.UUID),
+		DisplayName: getDisplayName(opts.UUID),
+		Description: getDescription(opts.ConnectorName, opts.UUID),
 
 		ConnectorName: opts.ConnectorName,
 		GithubSlug:    opts.GithubSlug,

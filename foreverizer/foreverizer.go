@@ -1,6 +1,7 @@
 package foreverizer
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/kardianos/service"
@@ -20,6 +21,11 @@ type Options struct {
 
 // Foreverize registers the service with the OS
 func Foreverize(opts Options) error {
+	err := validateOptions(opts)
+	if err != nil {
+		return err
+	}
+
 	debug("foreverizing...")
 	userService := true
 	if runtime.GOOS == "linux" {
@@ -57,6 +63,22 @@ func Foreverize(opts Options) error {
 	err = connectorService.Start()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func validateOptions(opts Options) error {
+	if opts.Description == "" {
+		return fmt.Errorf("Missing required param: Description")
+	}
+	if opts.DisplayName == "" {
+		return fmt.Errorf("Missing required param: DisplayName")
+	}
+	if opts.IgnitionPath == "" {
+		return fmt.Errorf("Missing required param: IgnitionPath")
+	}
+	if opts.ServiceName == "" {
+		return fmt.Errorf("Missing required param: ServiceName")
 	}
 	return nil
 }
