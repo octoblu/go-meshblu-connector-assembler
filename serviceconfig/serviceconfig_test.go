@@ -26,6 +26,7 @@ var _ = Describe("ServiceConfig", func() {
 			BeforeEach(func() {
 				options := serviceconfig.Options{
 					ServiceName:   "a-service-name",
+					ServiceType:   "Service",
 					DisplayName:   "a-display-name",
 					Description:   "a-description",
 					ConnectorName: "a-connector-name",
@@ -49,6 +50,7 @@ var _ = Describe("ServiceConfig", func() {
 				Expect(err).To(BeNil())
 				Expect(serviceJson).Should(MatchJSON(`{
 				  "ServiceName": "a-service-name",
+					"ServiceType": "Service",
 				  "DisplayName": "a-display-name",
 				  "Description": "a-description",
 				  "ConnectorName": "a-connector-name",
