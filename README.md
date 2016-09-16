@@ -1,7 +1,9 @@
 # Meshblu Connector Assembler
 
-[![Build Status](https://travis-ci.org/octoblu/go-meshblu-connector-assembler.svg)](https://travis-ci.org/octoblu/go-meshblu-connector-assembler)
-[![Gitter](https://badges.gitter.im/octoblu/help.svg)](https://gitter.im/octoblu/help)
+[![Build Status](https://travis-ci.org/octoblu/go-meshblu-connector-assembler.svg?branch=master)](https://travis-ci.org/octoblu/go-meshblu-connector-assembler)
+[![GoDoc](https://godoc.org/github.com/octoblu/go-meshblu-connector-assembler?status.svg)](https://godoc.org/github.com/octoblu/go-meshblu-connector-assembler)
+[![Test Coverage](https://codecov.io/gh/octoblu/go-meshblu-connector-assembler/branch/master/graph/badge.svg)](https://codecov.io/gh/octoblu/go-meshblu-connector-assembler)
+[![Slack Status](http://community-slack.octoblu.com/badge.svg)](http://community-slack.octoblu.com)
 
 # Table of Contents
 
