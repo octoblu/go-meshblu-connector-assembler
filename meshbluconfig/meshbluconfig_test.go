@@ -28,7 +28,7 @@ var _ = Describe("Meshbluconfig", func() {
 					DirPath:    "/path/to/connector",
 					UUID:       "the-uuid",
 					Token:      "a-token",
-					ResolveSrv: true,
+					ResolveSRV: true,
 					Domain:     "foo.octoblu.com",
 				}
 				meshbluconfig.WriteWithFS(options, fs)

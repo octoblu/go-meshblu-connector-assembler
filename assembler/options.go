@@ -16,7 +16,7 @@ type OptionsOptions struct {
 	OutputDirectory string
 	ServiceName     string
 	Domain          string
-	ResolveSrv      bool
+	ResolveSRV      bool
 	UUID, Token     string
 	Debug           bool
 	ServiceType     string
@@ -44,7 +44,7 @@ type Options struct {
 	Description string
 
 	Domain      string
-	ResolveSrv  bool
+	ResolveSRV  bool
 	UUID, Token string
 	// Debug           bool
 
@@ -100,7 +100,7 @@ func NewOptions(opts OptionsOptions) (*Options, error) {
 		ConnectorDirectory: ConnectorDirectory,
 		OutputDirectory:    OutputDirectory,
 		Domain:             getDomain(opts.Domain),
-		ResolveSrv:         true,
+		ResolveSRV:         true,
 		IgnitionURL:        getIgnitionURI(opts.IgnitionTag, runtime.GOOS, runtime.GOARCH),
 		IgnitionPath:       getIgnitionPath(ConnectorDirectory),
 		LogDirectory:       getLogDirectory(ConnectorDirectory),
