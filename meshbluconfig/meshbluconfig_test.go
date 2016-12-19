@@ -25,11 +25,11 @@ var _ = Describe("Meshbluconfig", func() {
 		Describe("When called with a directory and meshblu params", func() {
 			BeforeEach(func() {
 				options := meshbluconfig.Options{
-					DirPath:  "/path/to/connector",
-					UUID:     "the-uuid",
-					Token:    "a-token",
-					Hostname: "a-host",
-					Port:     100,
+					DirPath:    "/path/to/connector",
+					UUID:       "the-uuid",
+					Token:      "a-token",
+					ResolveSrv: true,
+					Domain:     "foo.octoblu.com",
 				}
 				meshbluconfig.WriteWithFS(options, fs)
 			})
@@ -43,7 +43,7 @@ var _ = Describe("Meshbluconfig", func() {
 			It("Should match properties", func() {
 				meshbluJson, err := afero.ReadFile(fs, "/path/to/connector/meshblu.json")
 				Expect(err).To(BeNil())
-				Expect(meshbluJson).Should(MatchJSON(`{"uuid": "the-uuid", "token": "a-token", "hostname": "a-host", "port": 100}`))
+				Expect(meshbluJson).Should(MatchJSON(`{"uuid": "the-uuid", "token": "a-token", "resolveSrv": true, "domain": "foo.octoblu.com"}`))
 			})
 		})
 	})
