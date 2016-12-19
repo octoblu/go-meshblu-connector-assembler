@@ -46,5 +46,30 @@ var _ = Describe("Meshbluconfig", func() {
 				Expect(meshbluJson).Should(MatchJSON(`{"uuid": "the-uuid", "token": "a-token", "resolveSrv": true, "domain": "foo.octoblu.com"}`))
 			})
 		})
+
+		Describe("When called with a directory and resolveSrv false", func() {
+			BeforeEach(func() {
+				options := meshbluconfig.Options{
+					DirPath:    "/path/to/connector",
+					UUID:       "the-uuid",
+					Token:      "a-token",
+					ResolveSRV: false,
+					Domain:     "",
+				}
+				meshbluconfig.WriteWithFS(options, fs)
+			})
+
+			It("Should write meshbluJSON file in memory file system", func() {
+				ok, err := afero.Exists(fs, "/path/to/connector/meshblu.json")
+				Expect(err).To(BeNil())
+				Expect(ok).To(BeTrue())
+			})
+
+			It("Should match properties", func() {
+				meshbluJson, err := afero.ReadFile(fs, "/path/to/connector/meshblu.json")
+				Expect(err).To(BeNil())
+				Expect(meshbluJson).Should(MatchJSON(`{"uuid": "the-uuid", "token": "a-token", "resolveSrv": false}`))
+			})
+		})
 	})
 })

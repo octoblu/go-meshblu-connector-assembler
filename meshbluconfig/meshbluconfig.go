@@ -10,7 +10,7 @@ import (
 type meshbluConfig struct {
 	UUID       string `json:"uuid"`
 	Token      string `json:"token"`
-	Domain     string `json:"domain"`
+	Domain     string `json:"domain,omitempty"`
 	ResolveSRV bool   `json:"resolveSrv"`
 }
 
